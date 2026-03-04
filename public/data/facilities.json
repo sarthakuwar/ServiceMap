@@ -1,0 +1,1066 @@
+[
+  {
+    "id": "fac_1",
+    "type": "hospital",
+    "name": "City hospital 1",
+    "lat": 12.989712992763641,
+    "lng": 77.55557336510773
+  },
+  {
+    "id": "fac_2",
+    "type": "hospital",
+    "name": "City hospital 2",
+    "lat": 12.940312756681939,
+    "lng": 77.55664718352509
+  },
+  {
+    "id": "fac_3",
+    "type": "hospital",
+    "name": "City hospital 3",
+    "lat": 12.927196190553154,
+    "lng": 77.5993231593246
+  },
+  {
+    "id": "fac_4",
+    "type": "hospital",
+    "name": "City hospital 4",
+    "lat": 12.959631629426138,
+    "lng": 77.61843013410085
+  },
+  {
+    "id": "fac_5",
+    "type": "hospital",
+    "name": "City hospital 5",
+    "lat": 12.995540817306438,
+    "lng": 77.60469815592714
+  },
+  {
+    "id": "fac_6",
+    "type": "hospital",
+    "name": "City hospital 6",
+    "lat": 12.996579148016453,
+    "lng": 77.59898751030637
+  },
+  {
+    "id": "fac_7",
+    "type": "hospital",
+    "name": "City hospital 7",
+    "lat": 12.993629582166747,
+    "lng": 77.60415054912264
+  },
+  {
+    "id": "fac_8",
+    "type": "hospital",
+    "name": "City hospital 8",
+    "lat": 12.976871958416464,
+    "lng": 77.56938468416492
+  },
+  {
+    "id": "fac_9",
+    "type": "hospital",
+    "name": "City hospital 9",
+    "lat": 12.937638809102934,
+    "lng": 77.63399890417672
+  },
+  {
+    "id": "fac_10",
+    "type": "hospital",
+    "name": "City hospital 10",
+    "lat": 12.99959312433015,
+    "lng": 77.59730667349965
+  },
+  {
+    "id": "fac_11",
+    "type": "hospital",
+    "name": "City hospital 11",
+    "lat": 12.938468685337435,
+    "lng": 77.59566515845844
+  },
+  {
+    "id": "fac_12",
+    "type": "hospital",
+    "name": "City hospital 12",
+    "lat": 12.992624336289941,
+    "lng": 77.62654562066176
+  },
+  {
+    "id": "fac_13",
+    "type": "school",
+    "name": "City school 1",
+    "lat": 13.010597386562559,
+    "lng": 77.62788295612998
+  },
+  {
+    "id": "fac_14",
+    "type": "school",
+    "name": "City school 2",
+    "lat": 12.950742292769705,
+    "lng": 77.59537311782877
+  },
+  {
+    "id": "fac_15",
+    "type": "school",
+    "name": "City school 3",
+    "lat": 12.984997108138119,
+    "lng": 77.62926666851553
+  },
+  {
+    "id": "fac_16",
+    "type": "school",
+    "name": "City school 4",
+    "lat": 12.920434677935184,
+    "lng": 77.6307199957468
+  },
+  {
+    "id": "fac_17",
+    "type": "school",
+    "name": "City school 5",
+    "lat": 12.949277712353245,
+    "lng": 77.62171094658623
+  },
+  {
+    "id": "fac_18",
+    "type": "school",
+    "name": "City school 6",
+    "lat": 12.931808823205584,
+    "lng": 77.64844170015675
+  },
+  {
+    "id": "fac_19",
+    "type": "school",
+    "name": "City school 7",
+    "lat": 13.01970725912018,
+    "lng": 77.6317831018066
+  },
+  {
+    "id": "fac_20",
+    "type": "school",
+    "name": "City school 8",
+    "lat": 12.962281749943624,
+    "lng": 77.55916069345899
+  },
+  {
+    "id": "fac_21",
+    "type": "school",
+    "name": "City school 9",
+    "lat": 12.99217328266944,
+    "lng": 77.62329101655935
+  },
+  {
+    "id": "fac_22",
+    "type": "school",
+    "name": "City school 10",
+    "lat": 12.960792231776665,
+    "lng": 77.59439774315787
+  },
+  {
+    "id": "fac_23",
+    "type": "school",
+    "name": "City school 11",
+    "lat": 12.962710953418664,
+    "lng": 77.64689518087303
+  },
+  {
+    "id": "fac_24",
+    "type": "school",
+    "name": "City school 12",
+    "lat": 12.962686223616448,
+    "lng": 77.58894051271412
+  },
+  {
+    "id": "fac_25",
+    "type": "school",
+    "name": "City school 13",
+    "lat": 12.939601455184032,
+    "lng": 77.55648234193329
+  },
+  {
+    "id": "fac_26",
+    "type": "school",
+    "name": "City school 14",
+    "lat": 12.948048770384405,
+    "lng": 77.5595919050204
+  },
+  {
+    "id": "fac_27",
+    "type": "school",
+    "name": "City school 15",
+    "lat": 12.983533627888937,
+    "lng": 77.58131829397897
+  },
+  {
+    "id": "fac_28",
+    "type": "school",
+    "name": "City school 16",
+    "lat": 12.966379679636946,
+    "lng": 77.59279688946425
+  },
+  {
+    "id": "fac_29",
+    "type": "school",
+    "name": "City school 17",
+    "lat": 12.987815479202498,
+    "lng": 77.6027136239643
+  },
+  {
+    "id": "fac_30",
+    "type": "school",
+    "name": "City school 18",
+    "lat": 13.001844758750998,
+    "lng": 77.63047201155963
+  },
+  {
+    "id": "fac_31",
+    "type": "school",
+    "name": "City school 19",
+    "lat": 12.968983685806542,
+    "lng": 77.63722010162584
+  },
+  {
+    "id": "fac_32",
+    "type": "school",
+    "name": "City school 20",
+    "lat": 12.927519813693419,
+    "lng": 77.64279730215883
+  },
+  {
+    "id": "fac_33",
+    "type": "school",
+    "name": "City school 21",
+    "lat": 12.98664367511458,
+    "lng": 77.56943241910396
+  },
+  {
+    "id": "fac_34",
+    "type": "school",
+    "name": "City school 22",
+    "lat": 13.008482540550288,
+    "lng": 77.57018478962435
+  },
+  {
+    "id": "fac_35",
+    "type": "school",
+    "name": "City school 23",
+    "lat": 12.98270921759548,
+    "lng": 77.60656429547396
+  },
+  {
+    "id": "fac_36",
+    "type": "school",
+    "name": "City school 24",
+    "lat": 12.951937842142035,
+    "lng": 77.63490644806646
+  },
+  {
+    "id": "fac_37",
+    "type": "school",
+    "name": "City school 25",
+    "lat": 12.931776370868578,
+    "lng": 77.60756630097299
+  },
+  {
+    "id": "fac_38",
+    "type": "school",
+    "name": "City school 26",
+    "lat": 12.939756278391352,
+    "lng": 77.56319270730172
+  },
+  {
+    "id": "fac_39",
+    "type": "school",
+    "name": "City school 27",
+    "lat": 13.006214718962427,
+    "lng": 77.55558592021642
+  },
+  {
+    "id": "fac_40",
+    "type": "school",
+    "name": "City school 28",
+    "lat": 12.995143540774137,
+    "lng": 77.62031400772143
+  },
+  {
+    "id": "fac_41",
+    "type": "school",
+    "name": "City school 29",
+    "lat": 12.934206890016878,
+    "lng": 77.63547463764239
+  },
+  {
+    "id": "fac_42",
+    "type": "school",
+    "name": "City school 30",
+    "lat": 12.92538327634741,
+    "lng": 77.58520703973308
+  },
+  {
+    "id": "fac_43",
+    "type": "school",
+    "name": "City school 31",
+    "lat": 12.999782552823747,
+    "lng": 77.58938927588923
+  },
+  {
+    "id": "fac_44",
+    "type": "school",
+    "name": "City school 32",
+    "lat": 12.922085395797366,
+    "lng": 77.63720862561635
+  },
+  {
+    "id": "fac_45",
+    "type": "school",
+    "name": "City school 33",
+    "lat": 12.999277098965534,
+    "lng": 77.60570597179057
+  },
+  {
+    "id": "fac_46",
+    "type": "school",
+    "name": "City school 34",
+    "lat": 12.960651025458885,
+    "lng": 77.62630201754496
+  },
+  {
+    "id": "fac_47",
+    "type": "school",
+    "name": "City school 35",
+    "lat": 12.962380580642675,
+    "lng": 77.5794808374869
+  },
+  {
+    "id": "fac_48",
+    "type": "school",
+    "name": "City school 36",
+    "lat": 12.928923640189124,
+    "lng": 77.55149110995437
+  },
+  {
+    "id": "fac_49",
+    "type": "school",
+    "name": "City school 37",
+    "lat": 12.925278373907313,
+    "lng": 77.57214787261925
+  },
+  {
+    "id": "fac_50",
+    "type": "school",
+    "name": "City school 38",
+    "lat": 12.97267554167231,
+    "lng": 77.58731542685653
+  },
+  {
+    "id": "fac_51",
+    "type": "school",
+    "name": "City school 39",
+    "lat": 13.013502822052702,
+    "lng": 77.61564450379622
+  },
+  {
+    "id": "fac_52",
+    "type": "school",
+    "name": "City school 40",
+    "lat": 12.93729895375245,
+    "lng": 77.64029680953489
+  },
+  {
+    "id": "fac_53",
+    "type": "bus_stop",
+    "name": "City bus_stop 1",
+    "lat": 12.929176586387266,
+    "lng": 77.55245528175081
+  },
+  {
+    "id": "fac_54",
+    "type": "bus_stop",
+    "name": "City bus_stop 2",
+    "lat": 12.993030432116106,
+    "lng": 77.62246021059181
+  },
+  {
+    "id": "fac_55",
+    "type": "bus_stop",
+    "name": "City bus_stop 3",
+    "lat": 12.965410185670104,
+    "lng": 77.56357375306548
+  },
+  {
+    "id": "fac_56",
+    "type": "bus_stop",
+    "name": "City bus_stop 4",
+    "lat": 12.960197505806333,
+    "lng": 77.59900703696422
+  },
+  {
+    "id": "fac_57",
+    "type": "bus_stop",
+    "name": "City bus_stop 5",
+    "lat": 12.981848920852904,
+    "lng": 77.5628295274436
+  },
+  {
+    "id": "fac_58",
+    "type": "bus_stop",
+    "name": "City bus_stop 6",
+    "lat": 12.958930450248074,
+    "lng": 77.55585700634416
+  },
+  {
+    "id": "fac_59",
+    "type": "bus_stop",
+    "name": "City bus_stop 7",
+    "lat": 12.926783860737585,
+    "lng": 77.62539449774798
+  },
+  {
+    "id": "fac_60",
+    "type": "bus_stop",
+    "name": "City bus_stop 8",
+    "lat": 12.924110322653016,
+    "lng": 77.62248342568236
+  },
+  {
+    "id": "fac_61",
+    "type": "bus_stop",
+    "name": "City bus_stop 9",
+    "lat": 12.987271603608292,
+    "lng": 77.61334521433169
+  },
+  {
+    "id": "fac_62",
+    "type": "bus_stop",
+    "name": "City bus_stop 10",
+    "lat": 12.978425660224593,
+    "lng": 77.62376071863909
+  },
+  {
+    "id": "fac_63",
+    "type": "bus_stop",
+    "name": "City bus_stop 11",
+    "lat": 12.949052834358664,
+    "lng": 77.61362290775511
+  },
+  {
+    "id": "fac_64",
+    "type": "bus_stop",
+    "name": "City bus_stop 12",
+    "lat": 12.969294133044698,
+    "lng": 77.56428651108605
+  },
+  {
+    "id": "fac_65",
+    "type": "bus_stop",
+    "name": "City bus_stop 13",
+    "lat": 12.929727295385163,
+    "lng": 77.61577213500065
+  },
+  {
+    "id": "fac_66",
+    "type": "bus_stop",
+    "name": "City bus_stop 14",
+    "lat": 12.93104696601422,
+    "lng": 77.55773859805925
+  },
+  {
+    "id": "fac_67",
+    "type": "bus_stop",
+    "name": "City bus_stop 15",
+    "lat": 12.927129849390314,
+    "lng": 77.61896495451289
+  },
+  {
+    "id": "fac_68",
+    "type": "bus_stop",
+    "name": "City bus_stop 16",
+    "lat": 12.991372092723774,
+    "lng": 77.6179768521455
+  },
+  {
+    "id": "fac_69",
+    "type": "bus_stop",
+    "name": "City bus_stop 17",
+    "lat": 12.990202644683587,
+    "lng": 77.58019664664478
+  },
+  {
+    "id": "fac_70",
+    "type": "bus_stop",
+    "name": "City bus_stop 18",
+    "lat": 12.991435192607547,
+    "lng": 77.63315602761926
+  },
+  {
+    "id": "fac_71",
+    "type": "bus_stop",
+    "name": "City bus_stop 19",
+    "lat": 13.011950864035287,
+    "lng": 77.63996265948667
+  },
+  {
+    "id": "fac_72",
+    "type": "bus_stop",
+    "name": "City bus_stop 20",
+    "lat": 12.98805301472163,
+    "lng": 77.63769405670571
+  },
+  {
+    "id": "fac_73",
+    "type": "bus_stop",
+    "name": "City bus_stop 21",
+    "lat": 12.934374070359192,
+    "lng": 77.61444522590786
+  },
+  {
+    "id": "fac_74",
+    "type": "bus_stop",
+    "name": "City bus_stop 22",
+    "lat": 12.934172931224856,
+    "lng": 77.61501751126546
+  },
+  {
+    "id": "fac_75",
+    "type": "bus_stop",
+    "name": "City bus_stop 23",
+    "lat": 13.007792007742724,
+    "lng": 77.55485123743526
+  },
+  {
+    "id": "fac_76",
+    "type": "bus_stop",
+    "name": "City bus_stop 24",
+    "lat": 13.01337226170393,
+    "lng": 77.63888512854038
+  },
+  {
+    "id": "fac_77",
+    "type": "bus_stop",
+    "name": "City bus_stop 25",
+    "lat": 12.961750018596028,
+    "lng": 77.60975769840006
+  },
+  {
+    "id": "fac_78",
+    "type": "bus_stop",
+    "name": "City bus_stop 26",
+    "lat": 12.926130099187901,
+    "lng": 77.6395706706693
+  },
+  {
+    "id": "fac_79",
+    "type": "bus_stop",
+    "name": "City bus_stop 27",
+    "lat": 12.930212432632539,
+    "lng": 77.63424902152126
+  },
+  {
+    "id": "fac_80",
+    "type": "bus_stop",
+    "name": "City bus_stop 28",
+    "lat": 13.008277675791401,
+    "lng": 77.64347044048337
+  },
+  {
+    "id": "fac_81",
+    "type": "bus_stop",
+    "name": "City bus_stop 29",
+    "lat": 12.969302630895475,
+    "lng": 77.64632615334817
+  },
+  {
+    "id": "fac_82",
+    "type": "bus_stop",
+    "name": "City bus_stop 30",
+    "lat": 12.963624900607563,
+    "lng": 77.56042961494624
+  },
+  {
+    "id": "fac_83",
+    "type": "bus_stop",
+    "name": "City bus_stop 31",
+    "lat": 12.972706896697217,
+    "lng": 77.58986676904924
+  },
+  {
+    "id": "fac_84",
+    "type": "bus_stop",
+    "name": "City bus_stop 32",
+    "lat": 12.987946664107715,
+    "lng": 77.58235582826497
+  },
+  {
+    "id": "fac_85",
+    "type": "bus_stop",
+    "name": "City bus_stop 33",
+    "lat": 13.008913036730675,
+    "lng": 77.61286318384317
+  },
+  {
+    "id": "fac_86",
+    "type": "bus_stop",
+    "name": "City bus_stop 34",
+    "lat": 12.954070862284084,
+    "lng": 77.57953582686793
+  },
+  {
+    "id": "fac_87",
+    "type": "bus_stop",
+    "name": "City bus_stop 35",
+    "lat": 12.974348189734009,
+    "lng": 77.63819040215917
+  },
+  {
+    "id": "fac_88",
+    "type": "bus_stop",
+    "name": "City bus_stop 36",
+    "lat": 13.004821053769282,
+    "lng": 77.58100731929314
+  },
+  {
+    "id": "fac_89",
+    "type": "bus_stop",
+    "name": "City bus_stop 37",
+    "lat": 12.998073314652064,
+    "lng": 77.55376794939434
+  },
+  {
+    "id": "fac_90",
+    "type": "bus_stop",
+    "name": "City bus_stop 38",
+    "lat": 12.926534717919122,
+    "lng": 77.64616714637667
+  },
+  {
+    "id": "fac_91",
+    "type": "bus_stop",
+    "name": "City bus_stop 39",
+    "lat": 13.01672266324466,
+    "lng": 77.61886021727187
+  },
+  {
+    "id": "fac_92",
+    "type": "bus_stop",
+    "name": "City bus_stop 40",
+    "lat": 13.01116522887311,
+    "lng": 77.58015675638336
+  },
+  {
+    "id": "fac_93",
+    "type": "bus_stop",
+    "name": "City bus_stop 41",
+    "lat": 13.013525878118237,
+    "lng": 77.5940022805232
+  },
+  {
+    "id": "fac_94",
+    "type": "bus_stop",
+    "name": "City bus_stop 42",
+    "lat": 12.944693305836813,
+    "lng": 77.58435599917466
+  },
+  {
+    "id": "fac_95",
+    "type": "bus_stop",
+    "name": "City bus_stop 43",
+    "lat": 12.991494220186066,
+    "lng": 77.64169579792221
+  },
+  {
+    "id": "fac_96",
+    "type": "bus_stop",
+    "name": "City bus_stop 44",
+    "lat": 13.01319946408153,
+    "lng": 77.63112061631047
+  },
+  {
+    "id": "fac_97",
+    "type": "bus_stop",
+    "name": "City bus_stop 45",
+    "lat": 12.971247100830455,
+    "lng": 77.60906061956987
+  },
+  {
+    "id": "fac_98",
+    "type": "bus_stop",
+    "name": "City bus_stop 46",
+    "lat": 12.936864445767164,
+    "lng": 77.63855559074695
+  },
+  {
+    "id": "fac_99",
+    "type": "bus_stop",
+    "name": "City bus_stop 47",
+    "lat": 13.005643387708233,
+    "lng": 77.61721597414548
+  },
+  {
+    "id": "fac_100",
+    "type": "bus_stop",
+    "name": "City bus_stop 48",
+    "lat": 12.960260613720761,
+    "lng": 77.5653475036979
+  },
+  {
+    "id": "fac_101",
+    "type": "bus_stop",
+    "name": "City bus_stop 49",
+    "lat": 13.011997905627169,
+    "lng": 77.60887362186305
+  },
+  {
+    "id": "fac_102",
+    "type": "bus_stop",
+    "name": "City bus_stop 50",
+    "lat": 12.981647890549901,
+    "lng": 77.63664949940076
+  },
+  {
+    "id": "fac_103",
+    "type": "bus_stop",
+    "name": "City bus_stop 51",
+    "lat": 12.928800784801972,
+    "lng": 77.57766328516959
+  },
+  {
+    "id": "fac_104",
+    "type": "bus_stop",
+    "name": "City bus_stop 52",
+    "lat": 12.944338548541786,
+    "lng": 77.55495141093618
+  },
+  {
+    "id": "fac_105",
+    "type": "bus_stop",
+    "name": "City bus_stop 53",
+    "lat": 12.92387448347342,
+    "lng": 77.56803407871286
+  },
+  {
+    "id": "fac_106",
+    "type": "bus_stop",
+    "name": "City bus_stop 54",
+    "lat": 12.931471631872679,
+    "lng": 77.55410925419743
+  },
+  {
+    "id": "fac_107",
+    "type": "bus_stop",
+    "name": "City bus_stop 55",
+    "lat": 12.952314637554137,
+    "lng": 77.60880384215656
+  },
+  {
+    "id": "fac_108",
+    "type": "bus_stop",
+    "name": "City bus_stop 56",
+    "lat": 13.010933694549719,
+    "lng": 77.55731112272272
+  },
+  {
+    "id": "fac_109",
+    "type": "bus_stop",
+    "name": "City bus_stop 57",
+    "lat": 12.965255023690524,
+    "lng": 77.63008445112085
+  },
+  {
+    "id": "fac_110",
+    "type": "bus_stop",
+    "name": "City bus_stop 58",
+    "lat": 13.001745200585766,
+    "lng": 77.63623635473259
+  },
+  {
+    "id": "fac_111",
+    "type": "bus_stop",
+    "name": "City bus_stop 59",
+    "lat": 13.00476426403364,
+    "lng": 77.62619452211986
+  },
+  {
+    "id": "fac_112",
+    "type": "bus_stop",
+    "name": "City bus_stop 60",
+    "lat": 12.997136586538469,
+    "lng": 77.63943639856369
+  },
+  {
+    "id": "fac_113",
+    "type": "bus_stop",
+    "name": "City bus_stop 61",
+    "lat": 12.957488931345726,
+    "lng": 77.58740872017984
+  },
+  {
+    "id": "fac_114",
+    "type": "bus_stop",
+    "name": "City bus_stop 62",
+    "lat": 12.954305207055661,
+    "lng": 77.64627826206534
+  },
+  {
+    "id": "fac_115",
+    "type": "bus_stop",
+    "name": "City bus_stop 63",
+    "lat": 12.94049767476631,
+    "lng": 77.62750500461125
+  },
+  {
+    "id": "fac_116",
+    "type": "bus_stop",
+    "name": "City bus_stop 64",
+    "lat": 13.012088903192767,
+    "lng": 77.62792986530526
+  },
+  {
+    "id": "fac_117",
+    "type": "bus_stop",
+    "name": "City bus_stop 65",
+    "lat": 12.986740328394662,
+    "lng": 77.59691703418527
+  },
+  {
+    "id": "fac_118",
+    "type": "bus_stop",
+    "name": "City bus_stop 66",
+    "lat": 12.955951215717416,
+    "lng": 77.63025671138429
+  },
+  {
+    "id": "fac_119",
+    "type": "bus_stop",
+    "name": "City bus_stop 67",
+    "lat": 12.986088190317204,
+    "lng": 77.61028932323926
+  },
+  {
+    "id": "fac_120",
+    "type": "bus_stop",
+    "name": "City bus_stop 68",
+    "lat": 12.981520310399159,
+    "lng": 77.59687413502645
+  },
+  {
+    "id": "fac_121",
+    "type": "bus_stop",
+    "name": "City bus_stop 69",
+    "lat": 12.925367325583835,
+    "lng": 77.63290006734819
+  },
+  {
+    "id": "fac_122",
+    "type": "bus_stop",
+    "name": "City bus_stop 70",
+    "lat": 12.955120993872338,
+    "lng": 77.62505406504255
+  },
+  {
+    "id": "fac_123",
+    "type": "bus_stop",
+    "name": "City bus_stop 71",
+    "lat": 12.98402050527681,
+    "lng": 77.58015737752227
+  },
+  {
+    "id": "fac_124",
+    "type": "bus_stop",
+    "name": "City bus_stop 72",
+    "lat": 12.946079555418347,
+    "lng": 77.607180853075
+  },
+  {
+    "id": "fac_125",
+    "type": "bus_stop",
+    "name": "City bus_stop 73",
+    "lat": 12.959186247668116,
+    "lng": 77.63177199547162
+  },
+  {
+    "id": "fac_126",
+    "type": "bus_stop",
+    "name": "City bus_stop 74",
+    "lat": 13.002416586949662,
+    "lng": 77.5530021311726
+  },
+  {
+    "id": "fac_127",
+    "type": "bus_stop",
+    "name": "City bus_stop 75",
+    "lat": 12.983573962073914,
+    "lng": 77.63608122436833
+  },
+  {
+    "id": "fac_128",
+    "type": "bus_stop",
+    "name": "City bus_stop 76",
+    "lat": 12.976929849803476,
+    "lng": 77.55735935892966
+  },
+  {
+    "id": "fac_129",
+    "type": "bus_stop",
+    "name": "City bus_stop 77",
+    "lat": 13.009109860506765,
+    "lng": 77.5956223429187
+  },
+  {
+    "id": "fac_130",
+    "type": "bus_stop",
+    "name": "City bus_stop 78",
+    "lat": 13.018655824938643,
+    "lng": 77.568088038547
+  },
+  {
+    "id": "fac_131",
+    "type": "bus_stop",
+    "name": "City bus_stop 79",
+    "lat": 13.01799424596655,
+    "lng": 77.57274598994573
+  },
+  {
+    "id": "fac_132",
+    "type": "bus_stop",
+    "name": "City bus_stop 80",
+    "lat": 12.998005695684803,
+    "lng": 77.57448028042563
+  },
+  {
+    "id": "fac_133",
+    "type": "police_station",
+    "name": "City police_station 1",
+    "lat": 13.001061353842704,
+    "lng": 77.62057843531967
+  },
+  {
+    "id": "fac_134",
+    "type": "police_station",
+    "name": "City police_station 2",
+    "lat": 13.000143221747223,
+    "lng": 77.58581354777164
+  },
+  {
+    "id": "fac_135",
+    "type": "police_station",
+    "name": "City police_station 3",
+    "lat": 12.998554122131956,
+    "lng": 77.59013396445835
+  },
+  {
+    "id": "fac_136",
+    "type": "police_station",
+    "name": "City police_station 4",
+    "lat": 12.922379461083953,
+    "lng": 77.5938767202654
+  },
+  {
+    "id": "fac_137",
+    "type": "police_station",
+    "name": "City police_station 5",
+    "lat": 12.973117679885943,
+    "lng": 77.6034662663689
+  },
+  {
+    "id": "fac_138",
+    "type": "police_station",
+    "name": "City police_station 6",
+    "lat": 12.94226226589871,
+    "lng": 77.64824078433979
+  },
+  {
+    "id": "fac_139",
+    "type": "police_station",
+    "name": "City police_station 7",
+    "lat": 12.990929163232833,
+    "lng": 77.57792224928565
+  },
+  {
+    "id": "fac_140",
+    "type": "police_station",
+    "name": "City police_station 8",
+    "lat": 12.969753302973324,
+    "lng": 77.64645651349726
+  },
+  {
+    "id": "fac_141",
+    "type": "police_station",
+    "name": "City police_station 9",
+    "lat": 12.944925228510497,
+    "lng": 77.56345809601785
+  },
+  {
+    "id": "fac_142",
+    "type": "police_station",
+    "name": "City police_station 10",
+    "lat": 12.984323648488461,
+    "lng": 77.58055332642688
+  },
+  {
+    "id": "fac_143",
+    "type": "fire_station",
+    "name": "City fire_station 1",
+    "lat": 12.979195905788258,
+    "lng": 77.61106816855755
+  },
+  {
+    "id": "fac_144",
+    "type": "fire_station",
+    "name": "City fire_station 2",
+    "lat": 13.01884073691633,
+    "lng": 77.64728300088731
+  },
+  {
+    "id": "fac_145",
+    "type": "fire_station",
+    "name": "City fire_station 3",
+    "lat": 12.953482746114238,
+    "lng": 77.56091458458914
+  },
+  {
+    "id": "fac_146",
+    "type": "fire_station",
+    "name": "City fire_station 4",
+    "lat": 13.013512089603525,
+    "lng": 77.616389886913
+  },
+  {
+    "id": "fac_147",
+    "type": "fire_station",
+    "name": "City fire_station 5",
+    "lat": 12.975734095360927,
+    "lng": 77.59495298062917
+  },
+  {
+    "id": "fac_148",
+    "type": "fire_station",
+    "name": "City fire_station 6",
+    "lat": 12.990126036472395,
+    "lng": 77.6036857877855
+  },
+  {
+    "id": "fac_149",
+    "type": "fire_station",
+    "name": "City fire_station 7",
+    "lat": 12.927330395662274,
+    "lng": 77.59237568340333
+  },
+  {
+    "id": "fac_150",
+    "type": "fire_station",
+    "name": "City fire_station 8",
+    "lat": 12.987761204567907,
+    "lng": 77.59689256814441
+  },
+  {
+    "id": "fac_151",
+    "type": "fire_station",
+    "name": "City fire_station 9",
+    "lat": 12.92624265496285,
+    "lng": 77.61855933482067
+  },
+  {
+    "id": "fac_152",
+    "type": "fire_station",
+    "name": "City fire_station 10",
+    "lat": 13.014718460087236,
+    "lng": 77.57111539151369
+  }
+]

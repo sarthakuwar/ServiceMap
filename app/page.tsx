@@ -1,101 +1,228 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import { GridCell, Facility, Recommendation, WardHistory, Insight } from './types';
+import { useSimulation } from './hooks/useSimulation';
+import { generateInsights } from './utils/insightEngine';
+import { generateWardReport } from './utils/reportGenerator';
+
+// Components
+import LeftSidebar from './components/Sidebar/LeftSidebar';
+import RightPanel from './components/Sidebar/RightPanel';
+import StatsBar from './components/UI/StatsBar';
+import SimulationToolbar from './components/Panels/SimulationToolbar';
+import InsightsPanel from './components/Panels/InsightsPanel';
+import LeaderboardPanel from './components/Panels/LeaderboardPanel';
+import GovernancePanel from './components/Panels/GovernancePanel';
+
+// Dynamic Map
+const DynamicMap = dynamic(() => import('./components/Map/DynamicMap'), { ssr: false });
+const WardDetailPage = dynamic(() => import('./components/Panels/WardDetailPage'), { ssr: false });
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<'map' | 'sim' | 'rank' | 'report'>('map');
+  const [vulnerabilityMode, setVulnerabilityMode] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Data State
+  const [gridCells, setGridCells] = useState<GridCell[]>([]);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [wardHistory, setWardHistory] = useState<WardHistory[]>([]);
+  const [insights, setInsights] = useState<Insight[]>([]);
+
+  // Simulation State
+  const [activeSimType, setActiveSimType] = useState<string | null>(null);
+  const { isSimulating, setIsSimulating, placedFacilities, simulatedCells, addFacility, reset, impactSummary } = useSimulation(gridCells);
+
+  // Selection State
+  const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
+  const selectedCell = (isSimulating ? simulatedCells : gridCells).find(c => c.cell_id === selectedCellId) || null;
+  const [visibleFacilities, setVisibleFacilities] = useState<string[]>([]);
+  const [showWardDetail, setShowWardDetail] = useState(false);
+
+  const API_BASE = 'http://localhost:8000';
+
+  useEffect(() => {
+    // Try FastAPI backend first, fallback to static JSON
+    Promise.all([
+      fetch(`${API_BASE}/api/grid?vulnerability=true`).then(r => r.json()),
+      fetch(`${API_BASE}/api/facilities`).then(r => r.json()),
+      fetch(`${API_BASE}/api/recommendations`).then(r => r.json()),
+      fetch(`${API_BASE}/api/ward-history`).then(r => r.json())
+    ]).then(([cellsData, facData, recData, historyData]) => {
+      setGridCells(cellsData);
+      setFacilities(facData);
+      setRecommendations(recData);
+      setWardHistory(historyData);
+      setInsights(generateInsights(cellsData));
+      setLoading(false);
+    }).catch(() => {
+      // Fallback to static JSON if backend is unavailable
+      console.warn('FastAPI backend unavailable, falling back to static JSON');
+      Promise.all([
+        fetch('/data/gridCells.json').then(r => r.json()),
+        fetch('/data/facilities.json').then(r => r.json()),
+        fetch('/data/recommendations.json').then(r => r.json()),
+        fetch('/data/wardHistory.json').then(r => r.json())
+      ]).then(([cellsData, facData, recData, historyData]) => {
+        setGridCells(cellsData);
+        setFacilities(facData);
+        setRecommendations(recData);
+        setWardHistory(historyData);
+        setInsights(generateInsights(cellsData));
+        setLoading(false);
+      }).catch(err => {
+        console.error('Error loading data:', err);
+        setLoading(false);
+      });
+    });
+  }, []);
+
+  // Dynamically update insights when simulation changes
+  useEffect(() => {
+    if (isSimulating && simulatedCells.length > 0) {
+      setInsights(generateInsights(simulatedCells));
+    } else if (!isSimulating && gridCells.length > 0) {
+      setInsights(generateInsights(gridCells));
+    }
+  }, [isSimulating, simulatedCells, gridCells]);
+
+  useEffect(() => {
+    if (activeView === 'sim') {
+      setIsSimulating(true);
+    } else {
+      setIsSimulating(false);
+      setActiveSimType(null);
+    }
+  }, [activeView, setIsSimulating]);
+
+  const handleGenerateReport = () => {
+    if (selectedCell) {
+      const wardRecs = recommendations.filter(r => r.ward_name === selectedCell.ward_name);
+      // Wait slightly for DOM if needed, but we pass the element ID
+      generateWardReport(
+        'service-map-container',
+        selectedCell.ward_name,
+        selectedCell.accessibility_score,
+        selectedCell.locality_rating,
+        selectedCell.population_estimate,
+        wardRecs
+      );
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-900 flex-col">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mb-4"></div>
+        <p className="text-emerald-400 font-medium animate-pulse">Loading city infrastructure data...</p>
+      </div>
+    );
+  }
+
+  const avgScore = gridCells.length > 0
+    ? Math.round(gridCells.reduce((sum, c) => sum + c.accessibility_score, 0) / gridCells.length)
+    : 0;
+
+  return (
+    <div className="flex h-screen w-full bg-slate-900 overflow-hidden text-slate-50 font-sans">
+      <LeftSidebar activeView={activeView} setActiveView={setActiveView} avgScore={avgScore} impactSummary={isSimulating ? impactSummary : null} vulnerabilityMode={vulnerabilityMode} setVulnerabilityMode={setVulnerabilityMode} visibleFacilities={visibleFacilities} setVisibleFacilities={setVisibleFacilities} />
+
+      <main className="flex-1 relative flex">
+        {/* Core Map Background */}
+        <div className="absolute inset-0 z-[1]">
+          <DynamicMap
+            cells={isSimulating ? simulatedCells : gridCells}
+            facilities={facilities}
+            selectedCellId={selectedCellId}
+            onCellClick={(c: GridCell) => {
+              if (!isSimulating) {
+                setSelectedCellId(c.cell_id);
+                if (activeView !== 'map') setActiveView('map');
+              }
+            }}
+            isSimulating={isSimulating}
+            activeSimType={activeSimType}
+            placedFacilities={placedFacilities}
+            onPlaceFacility={(lat: number, lng: number) => activeSimType && addFacility(activeSimType, lat, lng)}
+            visibleFacilities={visibleFacilities}
+            vulnerabilityMode={vulnerabilityMode}
+          />
         </div>
+
+        {/* Global Overlays */}
+        <StatsBar
+          cells={gridCells}
+          impactSummary={isSimulating ? impactSummary : null}
+        />
+
+        {/* Main Dashboard Overlays */}
+        {activeView === 'map' && (
+          <>
+            <div className="absolute top-20 right-6 z-[1000] w-[350px] shadow-2xl">
+              <InsightsPanel insights={insights} />
+            </div>
+
+            <RightPanel
+              cell={selectedCell}
+              onClose={() => setSelectedCellId(null)}
+              onGenerateReport={handleGenerateReport}
+              onViewDetail={() => setShowWardDetail(true)}
+            />
+          </>
+        )}
+
+        {/* Ward Detail Page Overlay */}
+        {showWardDetail && selectedCell && (
+          <WardDetailPage
+            cell={selectedCell}
+            allCells={isSimulating ? simulatedCells : gridCells}
+            wardHistory={wardHistory}
+            onClose={() => setShowWardDetail(false)}
+            onGenerateReport={handleGenerateReport}
+          />
+        )}
+
+        {/* Simulation Overlays */}
+        {activeView === 'sim' && (
+          <SimulationToolbar
+            activeType={activeSimType}
+            setActiveType={setActiveSimType}
+            onReset={reset}
+            impactSummary={impactSummary}
+          />
+        )}
+
+        {/* Leaderboard Overlay */}
+        {activeView === 'rank' && (
+          <div className="absolute inset-0 z-[2000] bg-slate-900/95 backdrop-blur-md overflow-hidden flex">
+            <div className="w-1/2 h-full">
+              <LeaderboardPanel cells={gridCells} recommendations={recommendations} />
+            </div>
+            <div className="w-1/2 h-full border-l border-slate-800">
+              <GovernancePanel history={wardHistory} />
+            </div>
+          </div>
+        )}
+
+        {/* Report Export View */}
+        {activeView === 'report' && (
+          <div className="absolute inset-0 z-[2000] bg-slate-900/80 backdrop-blur flex items-center justify-center p-8">
+            <div className="max-w-md w-full text-center">
+              <h2 className="text-3xl font-bold text-white mb-4">Export Analysis</h2>
+              <p className="text-slate-400 mb-8">Select a neighborhood on the map to generate a detailed policy document summing up current infrastructure accessibility.</p>
+              <button
+                onClick={() => setActiveView('map')}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full transition-colors"
+              >
+                Back to Map
+              </button>
+            </div>
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }

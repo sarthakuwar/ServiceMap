@@ -1,0 +1,42 @@
+[
+  {
+    "ward_id": "W1",
+    "ward_name": "Indiranagar",
+    "history": {
+      "Jan": 68,
+      "Feb": 72,
+      "Mar": 78
+    },
+    "badge": "Improving"
+  },
+  {
+    "ward_id": "W2",
+    "ward_name": "Malleshwaram",
+    "history": {
+      "Jan": 84,
+      "Feb": 83,
+      "Mar": 82
+    },
+    "badge": "Stable"
+  },
+  {
+    "ward_id": "W3",
+    "ward_name": "Koramangala",
+    "history": {
+      "Jan": 75,
+      "Feb": 76,
+      "Mar": 75
+    },
+    "badge": "Stable"
+  },
+  {
+    "ward_id": "W4",
+    "ward_name": "Jayanagar",
+    "history": {
+      "Jan": 62,
+      "Feb": 58,
+      "Mar": 52
+    },
+    "badge": "Declining"
+  }
+]
