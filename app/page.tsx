@@ -15,6 +15,7 @@ import SimulationToolbar from './components/Panels/SimulationToolbar';
 import InsightsPanel from './components/Panels/InsightsPanel';
 import LeaderboardPanel from './components/Panels/LeaderboardPanel';
 import GovernancePanel from './components/Panels/GovernancePanel';
+import AIChatbot from './components/UI/AIChatbot';
 
 // Dynamic Map
 const DynamicMap = dynamic(() => import('./components/Map/DynamicMap'), { ssr: false });
@@ -45,7 +46,6 @@ export default function Home() {
   const API_BASE = 'http://localhost:8000';
 
   useEffect(() => {
-    // Try FastAPI backend first, fallback to static JSON
     Promise.all([
       fetch(`${API_BASE}/api/grid?vulnerability=true`).then(r => r.json()),
       fetch(`${API_BASE}/api/facilities`).then(r => r.json()),
@@ -59,7 +59,6 @@ export default function Home() {
       setInsights(generateInsights(cellsData));
       setLoading(false);
     }).catch(() => {
-      // Fallback to static JSON if backend is unavailable
       console.warn('FastAPI backend unavailable, falling back to static JSON');
       Promise.all([
         fetch('/data/gridCells.json').then(r => r.json()),
@@ -80,7 +79,6 @@ export default function Home() {
     });
   }, []);
 
-  // Dynamically update insights when simulation changes
   useEffect(() => {
     if (isSimulating && simulatedCells.length > 0) {
       setInsights(generateInsights(simulatedCells));
@@ -101,7 +99,6 @@ export default function Home() {
   const handleGenerateReport = () => {
     if (selectedCell) {
       const wardRecs = recommendations.filter(r => r.ward_name === selectedCell.ward_name);
-      // Wait slightly for DOM if needed, but we pass the element ID
       generateWardReport(
         'service-map-container',
         selectedCell.ward_name,
@@ -115,9 +112,9 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-900 flex-col">
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50 flex-col">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mb-4"></div>
-        <p className="text-emerald-400 font-medium animate-pulse">Loading city infrastructure data...</p>
+        <p className="text-emerald-600 font-medium animate-pulse">Loading city infrastructure data...</p>
       </div>
     );
   }
@@ -127,7 +124,7 @@ export default function Home() {
     : 0;
 
   return (
-    <div className="flex h-screen w-full bg-slate-900 overflow-hidden text-slate-50 font-sans">
+    <div className="flex h-screen w-full bg-slate-50 overflow-hidden text-slate-900 font-sans">
       <LeftSidebar activeView={activeView} setActiveView={setActiveView} avgScore={avgScore} impactSummary={isSimulating ? impactSummary : null} vulnerabilityMode={vulnerabilityMode} setVulnerabilityMode={setVulnerabilityMode} visibleFacilities={visibleFacilities} setVisibleFacilities={setVisibleFacilities} />
 
       <main className="flex-1 relative flex">
@@ -161,8 +158,8 @@ export default function Home() {
         {/* Main Dashboard Overlays */}
         {activeView === 'map' && (
           <>
-            <div className="absolute top-20 right-6 z-[1000] w-[350px] shadow-2xl">
-              <InsightsPanel insights={insights} />
+            <div className="absolute top-20 right-6 z-[1000] w-[320px]">
+              <InsightsPanel insights={insights} cells={isSimulating ? simulatedCells : gridCells} recommendations={recommendations} />
             </div>
 
             <RightPanel
@@ -197,11 +194,11 @@ export default function Home() {
 
         {/* Leaderboard Overlay */}
         {activeView === 'rank' && (
-          <div className="absolute inset-0 z-[2000] bg-slate-900/95 backdrop-blur-md overflow-hidden flex">
+          <div className="absolute inset-0 z-[2000] bg-white/95 backdrop-blur-lg overflow-hidden flex">
             <div className="w-1/2 h-full">
               <LeaderboardPanel cells={gridCells} recommendations={recommendations} />
             </div>
-            <div className="w-1/2 h-full border-l border-slate-800">
+            <div className="w-1/2 h-full border-l border-slate-200">
               <GovernancePanel history={wardHistory} />
             </div>
           </div>
@@ -209,13 +206,13 @@ export default function Home() {
 
         {/* Report Export View */}
         {activeView === 'report' && (
-          <div className="absolute inset-0 z-[2000] bg-slate-900/80 backdrop-blur flex items-center justify-center p-8">
+          <div className="absolute inset-0 z-[2000] bg-white/90 backdrop-blur flex items-center justify-center p-8">
             <div className="max-w-md w-full text-center">
-              <h2 className="text-3xl font-bold text-white mb-4">Export Analysis</h2>
-              <p className="text-slate-400 mb-8">Select a neighborhood on the map to generate a detailed policy document summing up current infrastructure accessibility.</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Export Analysis</h2>
+              <p className="text-slate-500 mb-8">Select a neighborhood on the map to generate a detailed policy document summing up current infrastructure accessibility.</p>
               <button
                 onClick={() => setActiveView('map')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full transition-colors"
+                className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-8 rounded-full transition-colors shadow-lg"
               >
                 Back to Map
               </button>
@@ -223,6 +220,9 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {/* AI Chatbot FAB */}
+      <AIChatbot cells={gridCells} facilities={facilities} recommendations={recommendations} />
     </div>
   );
 }

@@ -1,89 +1,92 @@
 'use client';
 
-import { useMemo } from 'react';
-import { GeoJSON } from 'react-leaflet';
-import * as h3 from 'h3-js';
+import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { GridCell } from '@/app/types';
-import { getScoreColor } from '@/app/utils/scoring';
+import * as h3 from 'h3-js';
+import { useEffect, useRef } from 'react';
+import { GridCell } from '../../types';
 
 interface HexGridLayerProps {
     cells: GridCell[];
-    onCellClick: (cell: GridCell) => void;
     selectedCellId: string | null;
+    onCellClick: (cell: GridCell) => void;
     vulnerabilityMode?: boolean;
 }
 
-function getVulnerabilityColor(vuln: number): string {
-    if (vuln >= 70) return '#dc2626'; // red-600
-    if (vuln >= 55) return '#f97316'; // orange-500
-    if (vuln >= 40) return '#a855f7'; // purple-500
-    return '#6366f1'; // indigo-500
-}
+const getScoreColor = (score: number): string => {
+    if (score >= 80) return '#10b981';
+    if (score >= 60) return '#fbbf24';
+    if (score >= 40) return '#f97316';
+    return '#ef4444';
+};
 
-export default function HexGridLayer({ cells, onCellClick, selectedCellId, vulnerabilityMode = false }: HexGridLayerProps) {
-    // Convert H3 cells to a single GeoJSON FeatureCollection for optimal Leaflet rendering
-    const geoJsonData = useMemo(() => {
-        if (!cells || cells.length === 0) return { type: 'FeatureCollection', features: [] } as GeoJSON.FeatureCollection;
+const getVulnerabilityColor = (vi: number): string => {
+    if (vi >= 70) return '#dc2626';
+    if (vi >= 55) return '#f97316';
+    if (vi >= 40) return '#a855f7';
+    return '#6366f1';
+};
 
-        return {
-            type: 'FeatureCollection',
-            features: cells.map((cell) => {
-                const hexBoundary = h3.cellToBoundary(cell.cell_id, true);
-                return {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'Polygon',
-                        coordinates: [hexBoundary],
-                    },
-                    properties: cell,
-                };
-            }),
-        } as GeoJSON.FeatureCollection;
-    }, [cells]);
+export default function HexGridLayer({ cells, selectedCellId, onCellClick, vulnerabilityMode }: HexGridLayerProps) {
+    const map = useMap();
+    const layerGroupRef = useRef<L.LayerGroup>(L.layerGroup());
 
-    const styleFunction = (feature: unknown) => {
-        const props = (feature as { properties?: GridCell }).properties;
-        const isSelected = props?.cell_id === selectedCellId;
-        const fillColor = vulnerabilityMode
-            ? getVulnerabilityColor(props?.vulnerability_index ?? 0)
-            : getScoreColor(props?.accessibility_score ?? 0);
-        return {
-            fillColor,
-            weight: isSelected ? 3 : 1,
-            opacity: 1,
-            color: isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.2)',
-            fillOpacity: isSelected ? 0.7 : 0.45,
-        };
-    };
+    useEffect(() => {
+        const group = layerGroupRef.current;
+        group.clearLayers();
 
-    const onEachFeature = (feature: unknown, layer: L.Layer) => {
-        layer.on({
-            click: () => {
-                const props = (feature as { properties?: GridCell }).properties;
-                if (props) onCellClick(props);
-            },
-            mouseover: (e: L.LeafletMouseEvent) => {
-                const lyr = e.target;
-                lyr.setStyle({ fillOpacity: 0.8 });
-            },
-            mouseout: (e: L.LeafletMouseEvent) => {
-                const lyr = e.target;
-                lyr.setStyle(styleFunction(feature));
-            },
+        cells.forEach(cell => {
+            const boundary = h3.cellToBoundary(cell.cell_id);
+            const latLngs = boundary.map(([lat, lng]) => [lat, lng] as [number, number]);
+
+            const isSelected = cell.cell_id === selectedCellId;
+            const score = vulnerabilityMode ? (cell.vulnerability_index ?? cell.accessibility_score) : cell.accessibility_score;
+            const fillColor = vulnerabilityMode ? getVulnerabilityColor(score) : getScoreColor(cell.accessibility_score);
+
+            const polygon = L.polygon(latLngs, {
+                fillColor,
+                fillOpacity: isSelected ? 0.75 : 0.5,
+                color: isSelected ? '#0f172a' : 'rgba(0, 0, 0, 0.15)',
+                weight: isSelected ? 3 : 1,
+            });
+
+            polygon.on('click', () => onCellClick(cell));
+            polygon.on('mouseover', () => {
+                if (!isSelected) polygon.setStyle({ fillOpacity: 0.65 });
+            });
+            polygon.on('mouseout', () => {
+                if (!isSelected) polygon.setStyle({ fillOpacity: 0.5 });
+            });
+
+            polygon.bindTooltip(
+                `<div style="font-family: Inter, sans-serif; font-size: 12px; min-width: 140px; color: #0f172a;">
+                    <div style="font-weight: 700; margin-bottom: 4px;">${cell.ward_name}</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <span style="color: #64748b;">Score</span>
+                        <span style="font-weight: 600; color: ${fillColor};">${cell.accessibility_score}/100</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b;">Population</span>
+                        <span style="font-weight: 600;">${(cell.population_estimate / 1000).toFixed(1)}k</span>
+                    </div>
+                </div>`,
+                {
+                    direction: 'top',
+                    offset: [0, -10],
+                    className: '',
+                    opacity: 1,
+                }
+            );
+
+            polygon.addTo(group);
         });
-    };
 
-    // The key must change when data changes so GeoJSON completely re-renders 
-    // We use the length combined with the selected ID to avoid too many full rebuilds
-    const layerKey = `hex-layer-${cells.length}-${selectedCellId}-${vulnerabilityMode}`;
+        group.addTo(map);
 
-    return (
-        <GeoJSON
-            key={layerKey}
-            data={geoJsonData}
-            style={styleFunction}
-            onEachFeature={onEachFeature}
-        />
-    );
+        return () => {
+            group.clearLayers();
+        };
+    }, [cells, selectedCellId, map, onCellClick, vulnerabilityMode]);
+
+    return null;
 }

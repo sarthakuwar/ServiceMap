@@ -1,68 +1,106 @@
 import { WardHistory } from '@/app/types';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { getGovernanceBadgeColor } from '@/app/utils/scoring';
-import { TrendingUp, TrendingDown, Diamond } from 'lucide-react';
+import { BarChart, Bar, XAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 
 interface GovernancePanelProps {
     history: WardHistory[];
 }
 
-export default function GovernancePanel({ history }: GovernancePanelProps) {
-    const getIcon = (badge: string) => {
-        switch (badge) {
-            case 'Improving': return <TrendingUp className="w-4 h-4 mr-2" />;
-            case 'Declining': return <TrendingDown className="w-4 h-4 mr-2" />;
-            default: return <Diamond className="w-4 h-4 mr-2" />;
-        }
-    };
+const getBadgeStyle = (badge: string) => {
+    switch (badge) {
+        case 'Improving': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+        case 'Stable': return 'bg-blue-100 text-blue-700 border-blue-200';
+        case 'Declining': return 'bg-red-100 text-red-700 border-red-200';
+        default: return 'bg-slate-100 text-slate-600 border-slate-200';
+    }
+};
 
+const getBarColor = (badge: string, isLatest: boolean) => {
+    if (isLatest) {
+        switch (badge) {
+            case 'Improving': return '#10b981';
+            case 'Declining': return '#ef4444';
+            default: return '#f59e0b';
+        }
+    }
+    return '#fed7aa';
+};
+
+export default function GovernancePanel({ history }: GovernancePanelProps) {
     return (
-        <div className="p-8 h-full overflow-y-auto bg-[#0a0f1c]">
-            <div className="mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">Governance Accountability</h2>
-                <p className="text-slate-400">Track 3-month accessibility score trends across local wards to evaluate municipal intervention effectiveness.</p>
+        <div className="h-full overflow-y-auto p-8">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900">Governance Accountability</h2>
+                    <p className="text-sm text-slate-400 mt-1">Track 3-month accessibility score trends across local wards.</p>
+                </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-                {history.map(ward => {
+            <div className="grid grid-cols-2 gap-4">
+                {history.map((ward, idx) => {
                     const months = Object.keys(ward.history);
-                    const scores = Object.values(ward.history);
+                    const data = months.map((m, i) => ({
+                        name: m,
+                        score: ward.history[m],
+                        isLatest: i === months.length - 1
+                    }));
 
                     return (
-                        <Card key={ward.ward_id} className="p-6 bg-slate-800/50 border-slate-700 hover:bg-slate-800 transition-colors">
-                            <div className="flex justify-between items-start mb-6">
+                        <div key={ward.ward_id || idx} className="bg-white rounded-xl p-5 border border-slate-200 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-center mb-4">
                                 <div>
-                                    <h3 className="text-lg font-bold text-white mb-1">{ward.ward_name}</h3>
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Ward {ward.ward_id}</span>
+                                    <h3 className="font-bold text-slate-900 text-sm">{ward.ward_name}</h3>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Ward {ward.ward_id || idx + 1}</p>
                                 </div>
-                                <Badge variant="outline" className={`px-3 py-1 text-sm bg-transparent ${getGovernanceBadgeColor(ward.badge)}`}>
-                                    {getIcon(ward.badge)} {ward.badge}
-                                </Badge>
+                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getBadgeStyle(ward.badge)}`}>
+                                    {ward.badge}
+                                </span>
                             </div>
 
-                            <div className="flex justify-between items-end px-2">
-                                {months.map((month, i) => {
-                                    const score = scores[i];
-                                    const height = `${score}%`;
-                                    return (
-                                        <div key={month} className="flex flex-col items-center group">
-                                            <span className="text-xs font-bold mb-2 opacity-0 group-hover:opacity-100 transition-opacity text-white">{score}</span>
-                                            <div className="w-8 bg-slate-700/50 rounded-t-sm h-24 flex items-end">
-                                                <div
-                                                    className={`w-full rounded-t-sm transition-all duration-1000 ${i === months.length - 1 ? (ward.badge === 'Declining' ? 'bg-red-500' : 'bg-emerald-500') : 'bg-slate-600'
-                                                        }`}
-                                                    style={{ height }}
-                                                ></div>
-                                            </div>
-                                            <span className="text-xs text-slate-400 mt-3 font-medium uppercase">{month}</span>
-                                        </div>
-                                    );
-                                })}
+                            <div className="h-24">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={data} barCategoryGap="20%">
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                                        <Tooltip
+                                            cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+                                            contentStyle={{
+                                                background: '#ffffff',
+                                                border: '1px solid #e2e8f0',
+                                                borderRadius: '0.75rem',
+                                                fontSize: '12px',
+                                                padding: '8px 12px',
+                                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
+                                            }}
+                                            labelStyle={{ color: '#334155', fontWeight: 700, fontSize: '11px' }}
+                                        />
+                                        <Bar dataKey="score" radius={[4, 4, 0, 0]}>
+                                            {data.map((entry, i) => (
+                                                <Cell key={i} fill={getBarColor(ward.badge, entry.isLatest)} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </div>
-                        </Card>
+                        </div>
                     );
                 })}
+            </div>
+
+            {/* Governance Audit Banner */}
+            <div className="mt-6 bg-orange-50 border border-orange-200 rounded-xl p-5 flex items-center justify-between">
+                <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-500 mt-0.5">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-orange-800">Governance Audit Pending</h4>
+                        <p className="text-xs text-orange-600 mt-0.5">Monthly accountability reports for {history.length} wards are ready for review.</p>
+                    </div>
+                </div>
+                <button className="bg-orange-500 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors shrink-0">
+                    Review All
+                </button>
             </div>
         </div>
     );

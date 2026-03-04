@@ -1,92 +1,116 @@
 import { GridCell, Recommendation } from '@/app/types';
-import { Badge } from '@/components/ui/badge';
-import { getScoreColor } from '@/app/utils/scoring';
 
 interface LeaderboardPanelProps {
     cells: GridCell[];
-    recommendations: Recommendation[];
+    recommendations?: Recommendation[];
 }
 
-export default function LeaderboardPanel({ cells, recommendations }: LeaderboardPanelProps) {
-    // Aggregate cells by ward
-    const wardStats = cells.reduce((acc, cell) => {
-        if (!acc[cell.ward_name]) {
-            acc[cell.ward_name] = { score: 0, count: 0, pop: 0 };
+interface WardSummary {
+    ward_name: string;
+    avgScore: number;
+    population: number;
+    status: string;
+    need: string;
+}
+
+function getWardSummaries(cells: GridCell[], recs: Recommendation[]): WardSummary[] {
+    const wards: Record<string, { scores: number[]; pop: number }> = {};
+
+    cells.forEach(c => {
+        if (!wards[c.ward_name]) wards[c.ward_name] = { scores: [], pop: 0 };
+        wards[c.ward_name].scores.push(c.accessibility_score);
+        wards[c.ward_name].pop += c.population_estimate;
+    });
+
+    return Object.entries(wards).map(([name, data]) => {
+        const avg = Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length);
+        const rec = recs.find(r => r.ward_name === name);
+
+        return {
+            ward_name: name,
+            avgScore: avg,
+            population: data.pop,
+            status: avg >= 80 ? 'On the Rise' : avg >= 60 ? 'Steady' : avg >= 40 ? 'At Risk' : 'Critical',
+            need: rec ? rec.missing_service.replace('_', ' ') : 'All essential services within reach'
+        };
+    }).sort((a, b) => b.avgScore - a.avgScore);
+}
+
+export default function LeaderboardPanel({ cells, recommendations = [] }: LeaderboardPanelProps) {
+    const summaries = getWardSummaries(cells, recommendations);
+
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case 'On the Rise': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            case 'Steady': return 'bg-blue-100 text-blue-700 border-blue-200';
+            case 'At Risk': return 'bg-orange-100 text-orange-700 border-orange-200';
+            case 'Critical': return 'bg-red-100 text-red-700 border-red-200';
+            default: return 'bg-slate-100 text-slate-600 border-slate-200';
         }
-        acc[cell.ward_name].score += cell.accessibility_score;
-        acc[cell.ward_name].count += 1;
-        acc[cell.ward_name].pop += cell.population_estimate;
-        return acc;
-    }, {} as Record<string, { score: number; count: number; pop: number }>);
+    };
 
-    const leaderboard = Object.entries(wardStats)
-        .map(([name, data]) => {
-            const avgScore = Math.round(data.score / data.count);
-            const rec = recommendations.find(r => r.ward_name === name);
-
-            let status = 'Steady';
-            let statusColor = 'text-blue-400 bg-blue-400/10 border-blue-400/20';
-            if (avgScore > 75) { status = 'On the Rise'; statusColor = 'text-amber-400 bg-amber-400/10 border-amber-400/20'; }
-            else if (avgScore < 45) { status = 'Critical'; statusColor = 'text-red-400 bg-red-400/10 border-red-400/20'; }
-            else if (avgScore < 60) { status = 'At Risk'; statusColor = 'text-orange-400 bg-orange-400/10 border-orange-400/20'; }
-
-            return {
-                name,
-                score: avgScore,
-                pop: data.pop,
-                status,
-                statusColor,
-                needs: rec ? `${rec.missing_service.replace('_', ' ')} needed urgently` : 'All essential services within reach'
-            };
-        })
-        .sort((a, b) => b.score - a.score);
+    const getScoreBarColor = (score: number) => {
+        if (score >= 80) return 'bg-emerald-500';
+        if (score >= 60) return 'bg-yellow-500';
+        if (score >= 40) return 'bg-orange-500';
+        return 'bg-red-500';
+    };
 
     return (
-        <div className="p-8 h-full overflow-y-auto bg-[#0f172a]">
-            <div className="mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">Neighborhood Progress Leaderboard</h2>
-                <p className="text-slate-400">Identify critical local needs and track progress across neighborhoods.</p>
+        <div className="h-full overflow-y-auto p-8">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900">Neighborhood Progress Leaderboard</h2>
+                    <p className="text-sm text-slate-400 mt-1">Identify critical local needs and track progress across neighborhoods.</p>
+                </div>
+                <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">Live Updates</span>
             </div>
 
-            <div className="w-full bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 p-4 border-b border-slate-800 bg-slate-900/50 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    <div className="col-span-4 pl-4">Neighborhood</div>
-                    <div className="col-span-3">Progress Score</div>
-                    <div className="col-span-2 text-center">Status</div>
-                    <div className="col-span-3">Community Needs</div>
-                </div>
-
-                {/* List */}
-                <div className="divide-y divide-slate-800">
-                    {leaderboard.map((item, idx) => (
-                        <div key={item.name} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-800/30 transition-colors">
-                            <div className="col-span-4 pl-4 flex items-center space-x-3">
-                                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400">
-                                    #{idx + 1}
+            <table className="w-full">
+                <thead>
+                    <tr className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        <th className="text-left pb-4 pr-2">Rank</th>
+                        <th className="text-left pb-4 pr-2">Ward Name</th>
+                        <th className="text-left pb-4 pr-2">Progress Score</th>
+                        <th className="text-left pb-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {summaries.map((ward, idx) => (
+                        <tr key={ward.ward_name} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                            <td className="py-4 pr-2">
+                                <span className="text-lg font-bold text-slate-600">#{idx + 1}</span>
+                            </td>
+                            <td className="py-4 pr-2">
+                                <div className="text-sm font-bold text-slate-800">{ward.ward_name}</div>
+                                <div className="text-[10px] text-slate-400 uppercase tracking-wider">ID: W{idx + 1}</div>
+                            </td>
+                            <td className="py-4 pr-2">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-24 h-2 bg-slate-100 rounded-full">
+                                        <div className={`h-full rounded-full ${getScoreBarColor(ward.avgScore)}`} style={{ width: `${ward.avgScore}%` }}></div>
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-700">{ward.avgScore}</span>
                                 </div>
-                                <span className="font-semibold text-slate-200">{item.name}</span>
-                            </div>
-
-                            <div className="col-span-3 flex items-center space-x-3">
-                                <span className={`font-bold ${item.score >= 80 ? 'text-emerald-400' : item.score >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>{item.score}</span>
-                                <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                    <div className="h-full rounded-full transition-all" style={{ width: `${item.score}%`, backgroundColor: getScoreColor(item.score) }}></div>
-                                </div>
-                            </div>
-
-                            <div className="col-span-2 flex justify-center">
-                                <Badge variant="outline" className={`px-3 py-1 ${item.statusColor}`}>
-                                    {item.status}
-                                </Badge>
-                            </div>
-
-                            <div className="col-span-3">
-                                <span className={`text-sm ${item.score > 75 ? 'text-emerald-400/80' : 'text-slate-400'}`}>{item.needs}</span>
-                            </div>
-                        </div>
+                            </td>
+                            <td className="py-4">
+                                <span className={`text-xs font-bold px-3 py-1 rounded-full border ${getStatusBadge(ward.status)}`}>
+                                    {ward.status}
+                                </span>
+                            </td>
+                        </tr>
                     ))}
-                </div>
+                </tbody>
+            </table>
+
+            <div className="mt-6 text-center">
+                <button className="text-sm text-blue-600 font-medium hover:underline">View All {summaries.length} Wards</button>
+            </div>
+
+            {/* Bottom stats */}
+            <div className="mt-8 pt-6 border-t border-slate-200 flex justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                <span>Avg City Progress: <span className="text-emerald-600 text-slate-600">{summaries.length > 0 ? Math.round(summaries.reduce((s, w) => s + w.avgScore, 0) / summaries.length) : 0}%</span></span>
+                <span>Active Wards: <span className="text-slate-600">{summaries.length}</span></span>
             </div>
         </div>
     );
