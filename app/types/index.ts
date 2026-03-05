@@ -11,6 +11,7 @@ export interface GridCell {
     latitude: number;
     longitude: number;
     population_estimate: number;
+    population_density?: number;
     service_distances: ServiceDistances;
     accessibility_score: number;
     locality_rating: number;
@@ -19,6 +20,20 @@ export interface GridCell {
     ward_name: string;
     vulnerability_index?: number;
     fairness_adjusted_score?: number;
+    n_nearest_averages?: {
+        hospital_3: number;
+        school_3: number;
+        emergency_1: number;
+        transit_1: number;
+        [key: string]: number;
+    };
+    provenance?: {
+        accessibility_sources: string[];
+        population_source: string;
+        facility_sources: string[];
+        computed_at: string;
+        formula_version: string;
+    };
 }
 
 export interface Facility {

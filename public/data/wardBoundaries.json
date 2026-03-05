@@ -11,7 +11,8 @@
       ],
       "properties": {
         "id": "W1",
-        "name": "Indiranagar"
+        "name": "Indiranagar",
+        "source": "BBMP GIS"
       },
       "geometry": {
         "type": "Polygon",
@@ -51,7 +52,8 @@
       ],
       "properties": {
         "id": "W2",
-        "name": "Malleshwaram"
+        "name": "Malleshwaram",
+        "source": "BBMP GIS"
       },
       "geometry": {
         "type": "Polygon",
@@ -91,7 +93,8 @@
       ],
       "properties": {
         "id": "W3",
-        "name": "Koramangala"
+        "name": "Koramangala",
+        "source": "BBMP GIS"
       },
       "geometry": {
         "type": "Polygon",
@@ -131,7 +134,8 @@
       ],
       "properties": {
         "id": "W4",
-        "name": "Jayanagar"
+        "name": "Jayanagar",
+        "source": "BBMP GIS"
       },
       "geometry": {
         "type": "Polygon",

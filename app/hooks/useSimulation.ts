@@ -54,7 +54,20 @@ export function useSimulation(initialCells: GridCell[]) {
             // If the new facility is closer than existing ones:
             if (dist < currentDistForType) {
                 const newDistances = { ...cell.service_distances, [type]: dist };
-                const newScore = computeAccessibilityScore(newDistances);
+
+                // Update n_nearest_averages for simulation
+                const newAverages = { ...(cell.n_nearest_averages || {} as any) };
+                if (type === 'hospital') {
+                    newAverages.hospital_3 = Math.min(newAverages.hospital_3 || 99, ((newAverages.hospital_3 || 5) * 2 + dist) / 3);
+                } else if (type === 'school') {
+                    newAverages.school_3 = Math.min(newAverages.school_3 || 99, ((newAverages.school_3 || 5) * 2 + dist) / 3);
+                } else if (type === 'police_station' || type === 'fire_station') {
+                    newAverages.emergency_1 = Math.min(newAverages.emergency_1 || 99, dist);
+                } else if (type === 'bus_stop') {
+                    newAverages.transit_1 = Math.min(newAverages.transit_1 || 99, dist);
+                }
+
+                const newScore = computeAccessibilityScore(newDistances, newAverages);
 
                 // If score actually improved
                 if (newScore > cell.accessibility_score) {
@@ -62,12 +75,28 @@ export function useSimulation(initialCells: GridCell[]) {
                     popAffected += cell.population_estimate;
                     totalScoreIncrease += (newScore - cell.accessibility_score);
 
+                    // Recompute vulnerability-adjusted score
+                    const popDensities = simulatedCells.map(c => c.population_density || (c.population_estimate / 0.73));
+                    let minPop = Math.min(...popDensities);
+                    let maxPop = Math.max(...popDensities);
+                    if (!isFinite(minPop)) minPop = 0;
+                    if (!isFinite(maxPop) || maxPop === minPop) maxPop = minPop + 1;
+
+                    const popDensity = cell.population_density || (cell.population_estimate / 0.73);
+                    const normalizedPopulation = (popDensity - minPop) / (maxPop - minPop);
+                    const serviceDeficit = 1 - (newScore / 100);
+                    const vulnerability_index = Math.round((0.6 * serviceDeficit + 0.4 * normalizedPopulation) * 100);
+                    const fairness_adjusted_score = Math.max(0, newScore - Math.round(vulnerability_index * 0.15));
+
                     return {
                         ...cell,
                         service_distances: newDistances,
+                        n_nearest_averages: newAverages,
                         accessibility_score: newScore,
                         locality_rating: getLocalityRating(newScore),
-                        priority_score: computePriorityScore(cell.population_estimate, newScore)
+                        priority_score: computePriorityScore(cell.population_estimate, newScore),
+                        vulnerability_index,
+                        fairness_adjusted_score
                     };
                 }
             }

@@ -1,6 +1,22 @@
 import { ServiceDistances } from '../types';
 
-export function computeAccessibilityScore(distances: ServiceDistances): number {
+export function computeAccessibilityScore(distances: ServiceDistances, n_nearest_averages?: Record<string, number>): number {
+    if (n_nearest_averages) {
+        const avg_hosp = n_nearest_averages.hospital_3 || 10;
+        const avg_sch = n_nearest_averages.school_3 || 10;
+        const near_emerg = n_nearest_averages.emergency_1 || 10;
+        const near_bus = n_nearest_averages.transit_1 || 10;
+
+        const score = (
+            0.40 * Math.max(0, 100 - (avg_hosp * 10)) +
+            0.30 * Math.max(0, 100 - (avg_sch * 15)) +
+            0.20 * Math.max(0, 100 - (near_emerg * 10)) +
+            0.10 * Math.max(0, 100 - (near_bus * 20))
+        );
+        return Math.round(score);
+    }
+
+    // Fallback if no averages
     const svc = (dist: number) => 1 / (1 + dist);
     const score =
         0.35 * svc(distances.hospital) +

@@ -61,15 +61,12 @@ ward_history_raw: list = _load_json("wardHistory.json")
 # Seed for deterministic demo results
 random.seed(42)
 
-# Assign synthetic vulnerability multipliers per ward (simulating income/demographic data)
-WARD_VULNERABILITY = {
-    "Jayanagar": 0.72,
-    "Malleshwaram": 0.55,
-    "Koramangala": 0.45,
-    "Indiranagar": 0.38,
-    "Whitefield": 0.65,
-    "BTM Layout": 0.78,
-}
+# Deterministic hash function for fake contacts
+def _hash_str(s: str) -> int:
+    h = 0
+    for c in s:
+        h = (h * 31 + ord(c)) & 0xFFFFFFFF
+    return h
 
 # Generate realistic Bangalore phone numbers and addresses for facilities
 FACILITY_CONTACTS = {}
@@ -98,23 +95,24 @@ SCHOOL_NAMES = [
 
 for fac in facilities_raw:
     fac_id = fac["id"]
-    fac_type = fac["type"]
-    idx = int(fac_id.split("_")[1])
-
+    fac_type = fac["category"] if "category" in fac else fac["type"]
+    seed = _hash_str(fac_id)
+    
     if fac_type == "hospital":
-        real_name = HOSPITAL_NAMES[idx % len(HOSPITAL_NAMES)]
+        real_name = HOSPITAL_NAMES[seed % len(HOSPITAL_NAMES)]
     elif fac_type == "school":
-        real_name = SCHOOL_NAMES[idx % len(SCHOOL_NAMES)]
+        real_name = SCHOOL_NAMES[seed % len(SCHOOL_NAMES)]
     else:
         real_name = fac["name"]
-
-    street = STREET_NAMES[idx % len(STREET_NAMES)]
-    phone = f"+91-80-{random.randint(2000, 9999)}-{random.randint(1000, 9999)}"
+        
+    street = STREET_NAMES[seed % len(STREET_NAMES)]
+    phone = f"+91-80-{(seed % 8000) + 2000}-{(seed % 9000) + 1000}"
     hours = "24/7" if fac_type in ("hospital", "police_station", "fire_station") else "8:00 AM – 6:00 PM"
-
+    pincodes = [560001, 560004, 560008, 560011, 560025, 560030, 560034, 560038, 560041, 560047]
+    
     FACILITY_CONTACTS[fac_id] = {
         "name": real_name,
-        "address": f"No. {random.randint(1, 250)}, {street}, Bengaluru - {random.choice([560001, 560004, 560008, 560011, 560025, 560030, 560034, 560038, 560041, 560047])}",
+        "address": f"No. {(seed % 250) + 1}, {street}, Bengaluru - {pincodes[seed % len(pincodes)]}",
         "phone": phone,
         "hours": hours,
         "emergency": fac_type in ("hospital", "police_station", "fire_station"),
@@ -123,17 +121,22 @@ for fac in facilities_raw:
 
 def _enrich_grid_cells(cells: list) -> list:
     """Add vulnerability_index and fairness_adjusted_score to each cell."""
+    if not cells: return []
+    
+    pop_densities = [c.get("population_density", c["population_estimate"] / 0.73) for c in cells]
+    min_pop = min(pop_densities) if pop_densities else 0
+    max_pop = max(pop_densities) if pop_densities else 1
+    if max_pop == min_pop: max_pop = min_pop + 1
+    
     enriched = []
     for cell in cells:
-        ward = cell.get("ward_name", "")
-        vuln_multiplier = WARD_VULNERABILITY.get(ward, 0.5)
-
-        # Population density factor (higher pop in underserved = more vulnerable)
-        pop_factor = min(1.0, cell["population_estimate"] / 60000)
-
-        # Vulnerability Index: 0-100, higher = more vulnerable
-        raw_vuln = (1 - cell["accessibility_score"] / 100) * 0.5 + vuln_multiplier * 0.3 + pop_factor * 0.2
-        vulnerability_index = round(raw_vuln * 100)
+        pop_density = cell.get("population_density", cell["population_estimate"] / 0.73)
+        normalized_population = (pop_density - min_pop) / (max_pop - min_pop)
+        
+        service_deficit = 1 - (cell["accessibility_score"] / 100)
+        
+        # Vulnerability = 0.6 * service_deficit + 0.4 * normalized_population
+        vulnerability_index = round((0.6 * service_deficit + 0.4 * normalized_population) * 100)
 
         # Fairness-adjusted score: penalizes areas with high vulnerability
         fairness_adjusted_score = max(0, cell["accessibility_score"] - round(vulnerability_index * 0.15))
@@ -205,16 +208,24 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def _compute_accessibility_score(distances: dict) -> int:
-    """Mirror the frontend scoring model exactly."""
-    svc = lambda d: 1.0 / (1.0 + d)
+def _compute_accessibility_score(distances: dict, n_nearest_averages: dict = None) -> int:
+    """Compute score based on n_nearest_averages matching frontend logic."""
+    if not n_nearest_averages:
+        # Fallback if old data format
+        return 50
+    
+    avg_hosp = n_nearest_averages.get("hospital_3", 10)
+    avg_sch = n_nearest_averages.get("school_3", 10)
+    near_emerg = n_nearest_averages.get("emergency_1", 10)
+    near_bus = n_nearest_averages.get("transit_1", 10)
+    
     score = (
-        0.35 * svc(distances.get("hospital", 10))
-        + 0.25 * svc(distances.get("bus_stop", 10))
-        + 0.20 * svc(distances.get("school", 10))
-        + 0.20 * svc(min(distances.get("police_station", 10), distances.get("fire_station", 10)))
+        0.40 * max(0, 100 - (avg_hosp * 10)) +
+        0.30 * max(0, 100 - (avg_sch * 15)) +
+        0.20 * max(0, 100 - (near_emerg * 10)) +
+        0.10 * max(0, 100 - (near_bus * 20))
     )
-    return round(score * 100)
+    return round(score)
 
 
 def _get_locality_rating(score: int) -> int:
@@ -346,7 +357,19 @@ def simulate(req: SimulationRequest):
 
         if dist < current_dist:
             new_distances = {**cell["service_distances"], req.facility_type: round(dist, 4)}
-            new_score = _compute_accessibility_score(new_distances)
+            # Update n_nearest_averages for the simulation appropriately
+            new_averages = {**cell.get("n_nearest_averages", {})}
+            # If the new distance is smaller than the average distance, we approximate the improvement
+            if req.facility_type == 'hospital':
+                new_averages['hospital_3'] = min(new_averages.get('hospital_3', 99), (new_averages.get('hospital_3', 5)*2 + dist) / 3)
+            elif req.facility_type == 'school':
+                new_averages['school_3'] = min(new_averages.get('school_3', 99), (new_averages.get('school_3', 5)*2 + dist) / 3)
+            elif req.facility_type in ('police_station', 'fire_station'):
+                new_averages['emergency_1'] = min(new_averages.get('emergency_1', 99), dist)
+            elif req.facility_type == 'bus_stop':
+                new_averages['transit_1'] = min(new_averages.get('transit_1', 99), dist)
+
+            new_score = _compute_accessibility_score(new_distances, new_averages)
 
             if new_score > cell["accessibility_score"]:
                 zones_improved += 1
@@ -354,16 +377,21 @@ def simulate(req: SimulationRequest):
                 total_score_increase += new_score - cell["accessibility_score"]
 
                 # Recompute vulnerability-adjusted score too
-                ward = cell.get("ward_name", "")
-                vuln_multiplier = WARD_VULNERABILITY.get(ward, 0.5)
-                pop_factor = min(1.0, cell["population_estimate"] / 60000)
-                raw_vuln = (1 - new_score / 100) * 0.5 + vuln_multiplier * 0.3 + pop_factor * 0.2
-                vulnerability_index = round(raw_vuln * 100)
+                pop_densities = [c.get("population_density", c["population_estimate"] / 0.73) for c in GRID_CELLS]
+                min_pop = min(pop_densities) if pop_densities else 0
+                max_pop = max(pop_densities) if pop_densities else 1
+                if max_pop == min_pop: max_pop = min_pop + 1
+                pop_density = cell.get("population_density", cell["population_estimate"] / 0.73)
+                normalized_population = (pop_density - min_pop) / (max_pop - min_pop)
+                
+                service_deficit = 1 - (new_score / 100)
+                vulnerability_index = round((0.6 * service_deficit + 0.4 * normalized_population) * 100)
                 fairness_adjusted_score = max(0, new_score - round(vulnerability_index * 0.15))
 
                 updated_cells.append({
                     **cell,
                     "service_distances": new_distances,
+                    "n_nearest_averages": new_averages,
                     "accessibility_score": new_score,
                     "locality_rating": _get_locality_rating(new_score),
                     "priority_score": round((cell["population_estimate"] / 1000) / max(1, new_score), 2),

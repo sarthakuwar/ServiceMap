@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { GridCell, WardHistory, ContactEntry } from '@/app/types';
-import { X, Users, Activity, Download, Shield, TrendingUp, Phone, MapPin, Clock, AlertTriangle, Droplets, Trash2, ExternalLink } from 'lucide-react';
+import { X, Users, Activity, Download, Shield, TrendingUp, Phone, MapPin, Clock, AlertTriangle, Droplets, Trash2, ExternalLink, Info, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, LineChart, Line, CartesianGrid } from 'recharts';
 
@@ -35,6 +35,7 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
     const [activeTab, setActiveTab] = useState<'overview' | 'services' | 'trends'>('overview');
     const [contacts, setContacts] = useState<Record<string, ContactEntry[]> | null>(null);
     const [contactsLoading, setContactsLoading] = useState(false);
+    const [showMethodology, setShowMethodology] = useState(false);
 
     const cityAvg = allCells.length > 0 ? Math.round(allCells.reduce((sum, c) => sum + c.accessibility_score, 0) / allCells.length) : 0;
     const wardCells = allCells.filter(c => c.ward_name === cell.ward_name);
@@ -105,11 +106,8 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                         </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                        <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50 text-xs font-bold px-4">
-                            <ExternalLink className="w-3 h-3 mr-1.5" /> Export Dossier
-                        </Button>
-                        <Button className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4">
-                            Follow Ward
+                        <Button variant="outline" onClick={() => setShowMethodology(true)} className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs font-bold px-4">
+                            <Info className="w-3 h-3 mr-1.5" /> Methodology
                         </Button>
                         <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors ml-2">
                             <X className="w-6 h-6" />
@@ -143,7 +141,7 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                     <div className="bg-white border border-slate-200 rounded-xl p-5">
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Service Coverage</div>
                         <div className="text-3xl font-extrabold text-blue-600">
-                            {cell.locality_rating}.{Math.floor(Math.random() * 5)}<span className="text-sm font-normal text-slate-300">/10</span>
+                            {cell.locality_rating}<span className="text-sm font-normal text-slate-300">/10</span>
                         </div>
                         <p className="text-xs text-slate-400 mt-1">👁 Avg. Public Health</p>
                     </div>
@@ -254,6 +252,35 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                                     </div>
                                 </div>
                                 <button className="text-xs text-blue-600 font-medium mt-3 hover:underline">View All 1,248 Ratings</button>
+                            </div>
+
+                            {/* Data Sources */}
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
+                                <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center">
+                                    <Database className="w-4 h-4 mr-2 text-slate-500" />
+                                    Data Sources
+                                </h3>
+                                <div className="space-y-3 pb-3 border-b border-slate-200 text-xs text-slate-600">
+                                    <div className="flex justify-between">
+                                        <span className="font-semibold text-slate-800">Hospitals</span>
+                                        <span>OpenStreetMap</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="font-semibold text-slate-800">Schools</span>
+                                        <span>OpenStreetMap</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="font-semibold text-slate-800">Population</span>
+                                        <span>WorldPop</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="font-semibold text-slate-800">Ward Boundaries</span>
+                                        <span>BBMP GIS</span>
+                                    </div>
+                                </div>
+                                <div className="pt-3 text-[10px] text-slate-400 font-medium">
+                                    Last Updated: {cell.provenance?.computed_at || new Date().toISOString().split('T')[0]}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -397,6 +424,106 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
             <div className="border-t border-slate-200 mt-8 py-4 text-center text-xs text-slate-400">
                 © 2024 ServiceMap Division • Data updated October 24, 2023 &nbsp;&nbsp;|&nbsp;&nbsp; Data Source &nbsp;&nbsp; Terms of Governance &nbsp;&nbsp; Privacy
             </div>
+
+            {showMethodology && (
+                <div className="fixed inset-0 z-[4000] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl overflow-hidden relative">
+                        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <h3 className="text-lg font-bold text-slate-900 flex items-center">
+                                <Info className="w-5 h-5 text-blue-500 mr-2" />
+                                Comprehensive Data Methodology
+                            </h3>
+                            <button onClick={() => setShowMethodology(false)} className="text-slate-400 hover:text-slate-600">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
+
+                            <section>
+                                <h4 className="flex items-center text-sm font-bold text-slate-900 mb-3">
+                                    <Database className="w-4 h-4 mr-2 text-slate-500" />
+                                    1. Primary Datasets
+                                </h4>
+                                <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
+                                    <li><strong>Facilities:</strong> Sourced live from the OpenStreetMap Overpass API (Hospitals, Clinics, Schools, Police/Fire Stations, Transit Hubs).</li>
+                                    <li><strong>Population:</strong> WorldPop 2023 1km spatial distribution data, mapped deterministically to the H3 resolution 8 hex grids.</li>
+                                    <li><strong>Boundaries:</strong> BBMP Administrative Zones mapped via GeoJSON bounding boxes.</li>
+                                </ul>
+                            </section>
+
+                            <section>
+                                <h4 className="flex items-center text-sm font-bold text-slate-900 mb-3">
+                                    <MapPin className="w-4 h-4 mr-2 text-slate-500" />
+                                    2. Accessibility Score (0-100)
+                                </h4>
+                                <p className="text-sm text-slate-600 mb-3 leading-relaxed">
+                                    Instead of measuring distance to a single closest facility, the platform measures the <strong>N-Nearest Average</strong> to reflect true service resilience (e.g., average distance to the 3 nearest hospitals).
+                                </p>
+                                <div className="bg-slate-50 border border-slate-200 p-4 rounded-lg text-xs text-slate-700 font-mono space-y-1">
+                                    <div className="font-bold text-slate-900 border-b border-slate-200 pb-2 mb-2">Score Components:</div>
+                                    <div>40% = max(0, 100 - (Avg Dist to 3 Hospitals × 10))</div>
+                                    <div>30% = max(0, 100 - (Avg Dist to 3 Schools × 15))</div>
+                                    <div>20% = max(0, 100 - (Dist to Nearest Emergency × 10))</div>
+                                    <div>10% = max(0, 100 - (Dist to Nearest Transit × 20))</div>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h4 className="flex items-center text-sm font-bold text-slate-900 mb-3">
+                                    <Activity className="w-4 h-4 mr-2 text-slate-500" />
+                                    3. Vulnerability Index (0-100)
+                                </h4>
+                                <p className="text-sm text-slate-600 mb-3 leading-relaxed">
+                                    Measures the risk profile of a ward by combining infrastructure deficit with relative population density. Higher scores denote greater vulnerability.
+                                </p>
+                                <div className="bg-slate-50 border border-slate-200 p-3 text-xs text-slate-700 font-mono rounded-lg">
+                                    VI = (0.60 × Service Deficit) + (0.40 × Normalized Population Density)
+                                </div>
+                                <p className="text-[10px] text-slate-500 mt-2">
+                                    <em>* Service Deficit is calculated as (1 - [Accessibility Score / 100]). Normalized Density scales the population against the city maximum.</em>
+                                </p>
+                            </section>
+
+                            <section>
+                                <h4 className="flex items-center text-sm font-bold text-slate-900 mb-3">
+                                    <TrendingUp className="w-4 h-4 mr-2 text-slate-500" />
+                                    4. Derived Analytical Metrics
+                                </h4>
+                                <div className="space-y-4">
+                                    <div className="border-l-2 border-orange-400 pl-3">
+                                        <div className="text-sm font-bold text-slate-800">Fairness Adjusted Score</div>
+                                        <p className="text-xs text-slate-600 mt-1">Penalizes high accessibility scores if the underlying population remains highly vulnerable to specific shocks. <br /><code className="bg-slate-100 px-1 py-0.5 rounded">Adjusted = max(0, Accessibility - (VI × 0.15))</code></p>
+                                    </div>
+                                    <div className="border-l-2 border-blue-400 pl-3">
+                                        <div className="text-sm font-bold text-slate-800">Priority Score</div>
+                                        <p className="text-xs text-slate-600 mt-1">Used to rank cells for intervention. A high population density coupled with a low accessibility score yields the highest priority.<br /><code className="bg-slate-100 px-1 py-0.5 rounded">Priority = (Population / 1000) / max(1, Accessibility Score)</code></p>
+                                    </div>
+                                    <div className="border-l-2 border-emerald-400 pl-3">
+                                        <div className="text-sm font-bold text-slate-800">Locality Rating / Service Coverage (1-10)</div>
+                                        <p className="text-xs text-slate-600 mt-1">A consumer-friendly tiering system converting out of ten. Directly derived from Accessibility thresholds (e.g. Score ≥ 85 = 9-10 rating, Score ≥ 70 = 7-8 rating).</p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 flex items-start">
+                                <AlertTriangle className="w-5 h-5 text-orange-500 mr-3 shrink-0" />
+                                <div>
+                                    <h4 className="text-sm font-bold text-orange-800 mb-1">Geospatial Limitations</h4>
+                                    <p className="text-xs text-orange-700 leading-relaxed">
+                                        All models leverage haversine (straight-line) distance algorithms to H3 cluster centroids. Traffic congestion, exact road network routing delays, and topographical barriers are not currently factored into the final accessibility index.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                            <Button onClick={() => setShowMethodology(false)} className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold px-8 py-2">
+                                Acknowledge & Close
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

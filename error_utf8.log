@@ -1,0 +1,53 @@
+﻿node : file:///C:/Users
+/Sarthak/Desktop/Servic
+eMap/scripts/generateDa
+ta.mjs:276
+At line:1 char:1
++ node scripts/generate
+Data.mjs 2>&1 | 
+Out-File -Encoding 
+utf8 error_ut ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (file:///C:/Us   
+ er...ateData.mjs:2    
+76:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+                
+recommendation_text: 
+\`Recommend new 
+hospital near \${cell.c
+ell_id.substring(0,6)}\
+`,
+                       
+              ^
+
+SyntaxError: Invalid 
+or unexpected token
+    at compileSourceTex
+tModule (node:internal/
+modules/esm/utils:338:1
+6)
+    at ModuleLoader.mod
+uleStrategy (node:inter
+nal/modules/esm/transla
+tors:102:18)
+    at #translate (node
+:internal/modules/esm/l
+oader:468:12)
+    at ModuleLoader.loa
+dAndTranslate (node:int
+ernal/modules/esm/loade
+r:515:27)
+    at async 
+ModuleJob._link (node:i
+nternal/modules/esm/mod
+ule_job:115:19)
+
+Node.js v22.14.0
