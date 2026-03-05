@@ -1,16 +1,18 @@
 import { Button } from '@/components/ui/button';
-import { Map, Activity, BarChart3, Shield, Layers, Eye, EyeOff } from 'lucide-react';
+import { Map, Activity, BarChart3, Shield, Eye, EyeOff, MessageSquareWarning, AlertTriangle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface LeftSidebarProps {
-    activeView: 'map' | 'sim' | 'rank' | 'report';
-    setActiveView: (v: 'map' | 'sim' | 'rank' | 'report') => void;
+    activeView: 'map' | 'sim' | 'rank' | 'report' | 'grievances';
+    setActiveView: (v: 'map' | 'sim' | 'rank' | 'report' | 'grievances') => void;
     avgScore?: number;
     impactSummary?: { populationAffected: number; zonesImproved: number; avgScoreIncrease: number } | null;
     vulnerabilityMode?: boolean;
     setVulnerabilityMode?: (v: boolean) => void;
     visibleFacilities?: string[];
     setVisibleFacilities?: (v: string[]) => void;
+    onReportIssue?: () => void;
+    grievanceCount?: number;
 }
 
 const FACILITY_LAYERS = [
@@ -21,7 +23,7 @@ const FACILITY_LAYERS = [
     { key: 'fire_station', label: 'Fire Stations', icon: '🚒', color: 'text-orange-500' },
 ];
 
-export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, impactSummary, vulnerabilityMode = false, setVulnerabilityMode, visibleFacilities = [], setVisibleFacilities }: LeftSidebarProps) {
+export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, impactSummary, vulnerabilityMode = false, setVulnerabilityMode, visibleFacilities = [], setVisibleFacilities, onReportIssue, grievanceCount }: LeftSidebarProps) {
     const getScoreColor = (s: number) => s >= 80 ? 'bg-emerald-500' : s >= 60 ? 'bg-yellow-500' : s >= 40 ? 'bg-orange-500' : 'bg-red-500';
     const getScoreTextColor = (s: number) => s >= 80 ? 'text-emerald-600' : s >= 60 ? 'text-yellow-600' : s >= 40 ? 'text-orange-500' : 'text-red-500';
 
@@ -88,6 +90,18 @@ export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, i
                     >
                         <BarChart3 className="mr-3 w-4 h-4" /> Leaderboard
                     </Button>
+
+                    <Button
+                        variant={activeView === 'grievances' ? 'secondary' : 'ghost'}
+                        className={`w-full justify-start rounded-lg ${activeView === 'grievances' ? 'bg-orange-50 text-orange-700 font-medium hover:bg-orange-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
+                        onClick={() => setActiveView('grievances')}
+                    >
+                        <MessageSquareWarning className="mr-3 w-4 h-4" />
+                        Grievances
+                        {grievanceCount !== undefined && grievanceCount > 0 && (
+                            <span className="ml-auto text-[10px] bg-red-500 text-white font-bold rounded-full w-5 h-5 flex items-center justify-center">{grievanceCount}</span>
+                        )}
+                    </Button>
                 </nav>
 
                 {/* Vulnerability Toggle */}
@@ -110,6 +124,17 @@ export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, i
                         </div>
                     </button>
                 </div>
+
+                {/* Report Issue */}
+                {onReportIssue && (
+                    <button
+                        onClick={onReportIssue}
+                        className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-2.5 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all shadow-md shadow-orange-200 text-sm"
+                    >
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>Report Issue</span>
+                    </button>
+                )}
 
                 {/* Map Layers */}
                 <div className="pt-3">

@@ -16,6 +16,8 @@ import InsightsPanel from './components/Panels/InsightsPanel';
 import LeaderboardPanel from './components/Panels/LeaderboardPanel';
 import GovernancePanel from './components/Panels/GovernancePanel';
 import AIChatbot from './components/UI/AIChatbot';
+import GrievanceDashboard from './components/Grievances/GrievanceDashboard';
+import GrievanceSubmitModal from './components/Grievances/GrievanceSubmitModal';
 
 // Dynamic Map
 const DynamicMap = dynamic(() => import('./components/Map/DynamicMap'), { ssr: false });
@@ -23,7 +25,7 @@ const WardDetailPage = dynamic(() => import('./components/Panels/WardDetailPage'
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<'map' | 'sim' | 'rank' | 'report'>('map');
+  const [activeView, setActiveView] = useState<'map' | 'sim' | 'rank' | 'report' | 'grievances'>('map');
   const [vulnerabilityMode, setVulnerabilityMode] = useState(false);
 
   // Data State
@@ -42,6 +44,8 @@ export default function Home() {
   const selectedCell = (isSimulating ? simulatedCells : gridCells).find(c => c.cell_id === selectedCellId) || null;
   const [visibleFacilities, setVisibleFacilities] = useState<string[]>([]);
   const [showWardDetail, setShowWardDetail] = useState(false);
+  const [showGrievanceModal, setShowGrievanceModal] = useState(false);
+  const [pendingGrievances, setPendingGrievances] = useState(0);
 
   const API_BASE = 'http://localhost:8000';
 
@@ -77,6 +81,14 @@ export default function Home() {
         setLoading(false);
       });
     });
+  }, []);
+
+  // Fetch pending grievance count
+  useEffect(() => {
+    fetch(`${API_BASE}/api/grievances/stats`)
+      .then(r => r.json())
+      .then(s => setPendingGrievances(s.pending_ack || 0))
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -125,7 +137,18 @@ export default function Home() {
 
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden text-slate-900 font-sans">
-      <LeftSidebar activeView={activeView} setActiveView={setActiveView} avgScore={avgScore} impactSummary={isSimulating ? impactSummary : null} vulnerabilityMode={vulnerabilityMode} setVulnerabilityMode={setVulnerabilityMode} visibleFacilities={visibleFacilities} setVisibleFacilities={setVisibleFacilities} />
+      <LeftSidebar
+        activeView={activeView}
+        setActiveView={setActiveView}
+        avgScore={avgScore}
+        impactSummary={isSimulating ? impactSummary : null}
+        vulnerabilityMode={vulnerabilityMode}
+        setVulnerabilityMode={setVulnerabilityMode}
+        visibleFacilities={visibleFacilities}
+        setVisibleFacilities={setVisibleFacilities}
+        onReportIssue={() => setShowGrievanceModal(true)}
+        grievanceCount={pendingGrievances}
+      />
 
       <main className="flex-1 relative flex">
         {/* Core Map Background */}
@@ -204,6 +227,13 @@ export default function Home() {
           </div>
         )}
 
+        {/* Grievance Dashboard Overlay */}
+        {activeView === 'grievances' && (
+          <div className="absolute inset-0 z-[2000] bg-white/95 backdrop-blur-lg overflow-hidden">
+            <GrievanceDashboard />
+          </div>
+        )}
+
         {/* Report Export View */}
         {activeView === 'report' && (
           <div className="absolute inset-0 z-[2000] bg-white/90 backdrop-blur flex items-center justify-center p-8">
@@ -223,6 +253,27 @@ export default function Home() {
 
       {/* AI Chatbot FAB */}
       <AIChatbot cells={gridCells} facilities={facilities} recommendations={recommendations} />
+
+      {/* Grievance Submission Modal */}
+      <GrievanceSubmitModal
+        isOpen={showGrievanceModal}
+        onClose={() => setShowGrievanceModal(false)}
+        prefilledLocation={selectedCell ? { lat: selectedCell.latitude, lng: selectedCell.longitude, ward_name: selectedCell.ward_name, cell_id: selectedCell.cell_id } : undefined}
+        onSubmit={async (data) => {
+          const res = await fetch(`${API_BASE}/api/grievances`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          const result = await res.json();
+          // Refresh pending count
+          fetch(`${API_BASE}/api/grievances/stats`)
+            .then(r => r.json())
+            .then(s => setPendingGrievances(s.pending_ack || 0))
+            .catch(() => { });
+          return result;
+        }}
+      />
     </div>
   );
 }

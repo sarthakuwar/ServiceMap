@@ -1,0 +1,941 @@
+[
+    {
+        "id": "GRV-BBMP-2026-00001",
+        "tracking_number": "TRK-A4B7C9D2",
+        "category": "road_pothole",
+        "severity": "critical",
+        "severity_official": "critical",
+        "title": "Large pothole on 100 Feet Road causing daily accidents",
+        "description": "Deep pothole (approx 2ft wide, 1ft deep) on 100 Feet Road near Indiranagar bus stop. Multiple two-wheelers have skidded here in the past week. Extremely dangerous during rain.",
+        "status": "escalated",
+        "department": "BBMP_Engineering",
+        "location": {
+            "lat": 12.9784,
+            "lng": 77.6408,
+            "address_text": "100 Feet Road, Indiranagar",
+            "ward_name": "Indiranagar",
+            "ward_id": "W1"
+        },
+        "photo_urls": [],
+        "citizen_name": "Vikram Rao",
+        "citizen_phone": "+91-98765-43210",
+        "is_anonymous": false,
+        "created_at": "2026-01-20T08:30:00Z",
+        "updated_at": "2026-03-01T10:00:00Z",
+        "acknowledged_at": "2026-01-22T14:30:00Z",
+        "sla_ack_deadline": "2026-01-23T08:30:00Z",
+        "sla_resolve_deadline": "2026-01-22T08:30:00Z",
+        "escalation_level": 2,
+        "assigned_officer": {
+            "id": "OFF001",
+            "name": "R. Krishnamurthy",
+            "designation": "Assistant Engineer",
+            "department": "BBMP_Engineering",
+            "phone": "+91-80-2222-3001",
+            "email": "r.krishnamurthy@bbmp.gov.in",
+            "role": "field_engineer"
+        },
+        "accessibility_score_at_filing": 57,
+        "vulnerability_index_at_filing": 62,
+        "timeline": [
+            {
+                "id": "t1",
+                "timestamp": "2026-01-20T08:30:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Vikram Rao",
+                "notes": "Filed via ServiceMap"
+            },
+            {
+                "id": "t2",
+                "timestamp": "2026-01-22T14:30:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "R. Krishnamurthy",
+                "notes": "Noted. Scheduling field visit for Thursday."
+            },
+            {
+                "id": "t3",
+                "timestamp": "2026-01-25T09:00:00Z",
+                "action": "Under Review",
+                "actor_type": "officer",
+                "actor_name": "R. Krishnamurthy",
+                "notes": "Field inspection completed. Pothole confirmed — severe."
+            },
+            {
+                "id": "t4",
+                "timestamp": "2026-02-19T00:00:00Z",
+                "action": "AUTO-ESCALATED: SLA Breach",
+                "actor_type": "system",
+                "actor_name": "System",
+                "notes": "30-day resolution SLA breached. Escalated to Zonal Commissioner."
+            },
+            {
+                "id": "t5",
+                "timestamp": "2026-03-01T10:00:00Z",
+                "action": "Escalated to Level 2",
+                "actor_type": "system",
+                "actor_name": "System",
+                "notes": "Still unresolved after 40 days. Escalated to BBMP Commissioner."
+            }
+        ],
+        "upvotes": 47
+    },
+    {
+        "id": "GRV-BBMP-2026-00002",
+        "tracking_number": "TRK-B5C8D0E3",
+        "category": "garbage",
+        "severity": "high",
+        "title": "Garbage not collected on CMH Road for 5 days",
+        "description": "Solid waste has not been collected from CMH Road, Indiranagar for the past 5 days. The pile is growing and attracting stray animals. Extremely unhygienic conditions.",
+        "status": "in_progress",
+        "department": "SWM",
+        "location": {
+            "lat": 12.9810,
+            "lng": 77.6350,
+            "address_text": "CMH Road, Indiranagar",
+            "ward_name": "Indiranagar",
+            "ward_id": "W1"
+        },
+        "photo_urls": [],
+        "citizen_name": "Anita Desai",
+        "citizen_phone": "+91-98765-12345",
+        "is_anonymous": false,
+        "created_at": "2026-02-25T07:00:00Z",
+        "updated_at": "2026-03-03T11:00:00Z",
+        "acknowledged_at": "2026-02-26T09:00:00Z",
+        "sla_ack_deadline": "2026-02-28T07:00:00Z",
+        "sla_resolve_deadline": "2026-03-12T07:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF005",
+            "name": "Venkatesh Rao",
+            "designation": "Sanitary Inspector",
+            "department": "SWM",
+            "phone": "+91-80-2222-3005",
+            "email": "v.rao@bbmp.gov.in",
+            "role": "field_engineer"
+        },
+        "accessibility_score_at_filing": 55,
+        "timeline": [
+            {
+                "id": "t6",
+                "timestamp": "2026-02-25T07:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Anita Desai"
+            },
+            {
+                "id": "t7",
+                "timestamp": "2026-02-26T09:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Venkatesh Rao",
+                "notes": "Noted. Dispatching collection truck today."
+            },
+            {
+                "id": "t8",
+                "timestamp": "2026-03-01T08:00:00Z",
+                "action": "Work Order Created",
+                "actor_type": "officer",
+                "actor_name": "Venkatesh Rao",
+                "notes": "Daily collection route updated. Extra truck assigned."
+            },
+            {
+                "id": "t9",
+                "timestamp": "2026-03-03T11:00:00Z",
+                "action": "In Progress",
+                "actor_type": "officer",
+                "actor_name": "Venkatesh Rao",
+                "notes": "Partial clearance done. Full clearance by Friday."
+            }
+        ],
+        "upvotes": 23
+    },
+    {
+        "id": "GRV-BBMP-2026-00003",
+        "tracking_number": "TRK-C6D9E1F4",
+        "category": "streetlight",
+        "severity": "medium",
+        "title": "12 streetlights non-functional on Brigade Road stretch",
+        "description": "The stretch from Brigade Road junction to Commercial Street has 12 non-working streetlights. Area is extremely dark after 7 PM, creating safety concerns.",
+        "status": "resolved",
+        "department": "BESCOM",
+        "location": {
+            "lat": 12.9716,
+            "lng": 77.6071,
+            "address_text": "Brigade Road, Koramangala",
+            "ward_name": "Koramangala",
+            "ward_id": "W3"
+        },
+        "photo_urls": [],
+        "citizen_name": "Deepak Srinivasan",
+        "citizen_phone": "+91-98765-67890",
+        "is_anonymous": false,
+        "created_at": "2026-02-13T16:00:00Z",
+        "updated_at": "2026-03-01T15:00:00Z",
+        "acknowledged_at": "2026-02-14T10:00:00Z",
+        "resolved_at": "2026-03-01T15:00:00Z",
+        "sla_ack_deadline": "2026-02-16T16:00:00Z",
+        "sla_resolve_deadline": "2026-03-15T16:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF004",
+            "name": "Meena Kumari",
+            "designation": "Assistant Engineer",
+            "department": "BESCOM",
+            "phone": "+91-80-2222-3004",
+            "email": "m.kumari@bescom.gov.in",
+            "role": "field_engineer"
+        },
+        "resolution_notes": "All 12 streetlights repaired. 4 bulbs replaced, 8 wiring issues fixed.",
+        "timeline": [
+            {
+                "id": "t10",
+                "timestamp": "2026-02-13T16:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Deepak Srinivasan"
+            },
+            {
+                "id": "t11",
+                "timestamp": "2026-02-14T10:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Meena Kumari",
+                "notes": "Will inspect today evening."
+            },
+            {
+                "id": "t12",
+                "timestamp": "2026-02-15T18:00:00Z",
+                "action": "Under Review",
+                "actor_type": "officer",
+                "actor_name": "Meena Kumari",
+                "notes": "Site inspected. 4 blown bulbs, 8 wiring faults identified."
+            },
+            {
+                "id": "t13",
+                "timestamp": "2026-02-20T09:00:00Z",
+                "action": "In Progress",
+                "actor_type": "officer",
+                "actor_name": "Meena Kumari",
+                "notes": "Work order raised. Repair crew scheduled."
+            },
+            {
+                "id": "t14",
+                "timestamp": "2026-03-01T15:00:00Z",
+                "action": "Resolved",
+                "actor_type": "officer",
+                "actor_name": "Meena Kumari",
+                "notes": "All 12 lights now operational. Verified at night."
+            }
+        ],
+        "upvotes": 18
+    },
+    {
+        "id": "GRV-BBMP-2026-00004",
+        "tracking_number": "TRK-D7E0F2G5",
+        "category": "water_supply",
+        "severity": "critical",
+        "title": "No water supply in Jayanagar 4th Block since Tuesday",
+        "description": "Residents of Jayanagar 4th Block have had no water supply for 3 consecutive days. BWSSB helpline is unresponsive. Urgent intervention needed.",
+        "status": "acknowledged",
+        "department": "BWSSB",
+        "location": {
+            "lat": 12.9279,
+            "lng": 77.5832,
+            "address_text": "4th Block, Jayanagar",
+            "ward_name": "Jayanagar",
+            "ward_id": "W4"
+        },
+        "photo_urls": [],
+        "citizen_name": "Padma Bhat",
+        "citizen_phone": "+91-98765-11111",
+        "is_anonymous": false,
+        "created_at": "2026-03-03T06:00:00Z",
+        "updated_at": "2026-03-04T10:00:00Z",
+        "acknowledged_at": "2026-03-04T10:00:00Z",
+        "sla_ack_deadline": "2026-03-06T06:00:00Z",
+        "sla_resolve_deadline": "2026-03-05T06:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF002",
+            "name": "Priya Sharma",
+            "designation": "Junior Engineer",
+            "department": "BWSSB",
+            "phone": "+91-80-2222-3002",
+            "email": "p.sharma@bwssb.gov.in",
+            "role": "field_engineer"
+        },
+        "accessibility_score_at_filing": 51,
+        "timeline": [
+            {
+                "id": "t15",
+                "timestamp": "2026-03-03T06:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Padma Bhat",
+                "notes": "No water since Tuesday morning."
+            },
+            {
+                "id": "t16",
+                "timestamp": "2026-03-04T10:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Priya Sharma",
+                "notes": "Valve issue identified in main pipeline. Repair crew dispatched."
+            }
+        ],
+        "upvotes": 62
+    },
+    {
+        "id": "GRV-BBMP-2026-00005",
+        "tracking_number": "TRK-E8F1G3H6",
+        "category": "sewage_drainage",
+        "severity": "high",
+        "title": "Sewage overflow on Sampige Road blocking pedestrians",
+        "description": "Sewage is overflowing from a manhole on Sampige Road near Malleshwaram market. The stench is unbearable and pedestrians are forced to walk on the road.",
+        "status": "under_review",
+        "department": "BWSSB",
+        "location": {
+            "lat": 13.0035,
+            "lng": 77.5685,
+            "address_text": "Sampige Road, Malleshwaram",
+            "ward_name": "Malleshwaram",
+            "ward_id": "W2"
+        },
+        "photo_urls": [],
+        "citizen_name": "Anonymous",
+        "citizen_phone": "+91-98765-22222",
+        "is_anonymous": true,
+        "created_at": "2026-03-01T11:00:00Z",
+        "updated_at": "2026-03-03T14:00:00Z",
+        "acknowledged_at": "2026-03-02T09:00:00Z",
+        "sla_ack_deadline": "2026-03-04T11:00:00Z",
+        "sla_resolve_deadline": "2026-03-16T11:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF002",
+            "name": "Priya Sharma",
+            "designation": "Junior Engineer",
+            "department": "BWSSB",
+            "phone": "+91-80-2222-3002",
+            "email": "p.sharma@bwssb.gov.in",
+            "role": "field_engineer"
+        },
+        "timeline": [
+            {
+                "id": "t17",
+                "timestamp": "2026-03-01T11:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Anonymous"
+            },
+            {
+                "id": "t18",
+                "timestamp": "2026-03-02T09:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Priya Sharma",
+                "notes": "Will inspect the manhole today."
+            },
+            {
+                "id": "t19",
+                "timestamp": "2026-03-03T14:00:00Z",
+                "action": "Under Review",
+                "actor_type": "officer",
+                "actor_name": "Priya Sharma",
+                "notes": "Manhole inspected. Blockage in 200m main line. Jetting machine needed."
+            }
+        ],
+        "upvotes": 31
+    },
+    {
+        "id": "GRV-BBMP-2026-00006",
+        "tracking_number": "TRK-F9G2H4I7",
+        "category": "tree_hazard",
+        "severity": "high",
+        "title": "Large tree tilting dangerously over Cunningham Road",
+        "description": "A large banyan tree near Cunningham Road junction is tilting at a dangerous angle. Risk of falling on vehicles/pedestrians, especially during storms.",
+        "status": "citizen_confirmed",
+        "department": "Horticulture",
+        "location": {
+            "lat": 12.9899,
+            "lng": 77.5920,
+            "address_text": "Cunningham Road, Malleshwaram",
+            "ward_name": "Malleshwaram",
+            "ward_id": "W2"
+        },
+        "photo_urls": [],
+        "citizen_name": "Suresh Hedge",
+        "citizen_phone": "+91-98765-33333",
+        "is_anonymous": false,
+        "created_at": "2026-02-10T09:00:00Z",
+        "updated_at": "2026-02-28T16:00:00Z",
+        "acknowledged_at": "2026-02-11T10:00:00Z",
+        "resolved_at": "2026-02-25T14:00:00Z",
+        "closed_at": "2026-02-28T16:00:00Z",
+        "sla_ack_deadline": "2026-02-13T09:00:00Z",
+        "sla_resolve_deadline": "2026-02-25T09:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF006",
+            "name": "Lakshmi Devi",
+            "designation": "Horticulture Officer",
+            "department": "Horticulture",
+            "phone": "+91-80-2222-3006",
+            "email": "l.devi@bbmp.gov.in",
+            "role": "field_engineer"
+        },
+        "resolution_notes": "Tree pruned and support cables installed. Certified safe by arborist.",
+        "citizen_satisfaction": 5,
+        "citizen_feedback": "Excellent response! Tree was handled within 2 weeks.",
+        "timeline": [
+            {
+                "id": "t20",
+                "timestamp": "2026-02-10T09:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Suresh Hedge"
+            },
+            {
+                "id": "t21",
+                "timestamp": "2026-02-11T10:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Lakshmi Devi",
+                "notes": "Urgent. Will inspect today."
+            },
+            {
+                "id": "t22",
+                "timestamp": "2026-02-12T11:00:00Z",
+                "action": "Under Review",
+                "actor_type": "officer",
+                "actor_name": "Lakshmi Devi",
+                "notes": "Tree is tilting 30 degrees. Pruning + support required."
+            },
+            {
+                "id": "t23",
+                "timestamp": "2026-02-18T08:00:00Z",
+                "action": "In Progress",
+                "actor_type": "officer",
+                "actor_name": "Lakshmi Devi",
+                "notes": "Arborist team scheduled for Thursday."
+            },
+            {
+                "id": "t24",
+                "timestamp": "2026-02-25T14:00:00Z",
+                "action": "Resolved",
+                "actor_type": "officer",
+                "actor_name": "Lakshmi Devi",
+                "notes": "Tree pruned and support cables installed."
+            },
+            {
+                "id": "t25",
+                "timestamp": "2026-02-28T16:00:00Z",
+                "action": "Citizen Verified",
+                "actor_type": "citizen",
+                "actor_name": "Suresh Hedge",
+                "notes": "Confirmed fixed. Thank you!"
+            }
+        ],
+        "upvotes": 12
+    },
+    {
+        "id": "GRV-BBMP-2026-00007",
+        "tracking_number": "TRK-G0H3I5J8",
+        "category": "public_transport",
+        "severity": "medium",
+        "title": "Bus shelter collapsed at Koramangala 5th Block",
+        "description": "The bus shelter at Koramangala 5th Block main road has collapsed. Commuters have no shade during rain/sun.",
+        "status": "submitted",
+        "department": "BMTC",
+        "location": {
+            "lat": 12.9352,
+            "lng": 77.6245,
+            "address_text": "5th Block Main Road, Koramangala",
+            "ward_name": "Koramangala",
+            "ward_id": "W3"
+        },
+        "photo_urls": [],
+        "citizen_name": "Kavitha S",
+        "citizen_phone": "+91-98765-44444",
+        "is_anonymous": false,
+        "created_at": "2026-03-04T15:00:00Z",
+        "updated_at": "2026-03-04T15:00:00Z",
+        "sla_ack_deadline": "2026-03-07T15:00:00Z",
+        "sla_resolve_deadline": "2026-04-03T15:00:00Z",
+        "escalation_level": 0,
+        "timeline": [
+            {
+                "id": "t26",
+                "timestamp": "2026-03-04T15:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Kavitha S",
+                "notes": "Bus shelter completely collapsed after last week's storm."
+            }
+        ],
+        "upvotes": 8
+    },
+    {
+        "id": "GRV-BBMP-2026-00008",
+        "tracking_number": "TRK-H1I4J6K9",
+        "category": "encroachment",
+        "severity": "medium",
+        "title": "Footpath encroached by vendors on MG Road",
+        "description": "Unauthorized vendors have encroached the entire footpath stretch near MG Road metro station. Pedestrians forced to walk on the road.",
+        "status": "submitted",
+        "department": "Revenue",
+        "location": {
+            "lat": 12.9754,
+            "lng": 77.6066,
+            "address_text": "MG Road, near Metro Station",
+            "ward_name": "Koramangala",
+            "ward_id": "W3"
+        },
+        "photo_urls": [],
+        "citizen_name": "Ramesh Kumar",
+        "citizen_phone": "+91-98765-55555",
+        "is_anonymous": false,
+        "created_at": "2026-03-05T09:00:00Z",
+        "updated_at": "2026-03-05T09:00:00Z",
+        "sla_ack_deadline": "2026-03-08T09:00:00Z",
+        "sla_resolve_deadline": "2026-04-04T09:00:00Z",
+        "escalation_level": 0,
+        "timeline": [
+            {
+                "id": "t27",
+                "timestamp": "2026-03-05T09:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Ramesh Kumar"
+            }
+        ],
+        "upvotes": 15
+    },
+    {
+        "id": "GRV-BBMP-2026-00009",
+        "tracking_number": "TRK-I2J5K7L0",
+        "category": "park_maintenance",
+        "severity": "low",
+        "title": "Cubbon Park children's play area equipment broken",
+        "description": "Three swing sets and one slide in the Cubbon Park children's section are broken and unsafe. Children are using them despite the damage.",
+        "status": "in_progress",
+        "department": "Horticulture",
+        "location": {
+            "lat": 12.9763,
+            "lng": 77.5929,
+            "address_text": "Cubbon Park, near Children's Section",
+            "ward_name": "Malleshwaram",
+            "ward_id": "W2"
+        },
+        "photo_urls": [],
+        "citizen_name": "Nandini Murthy",
+        "citizen_phone": "+91-98765-66666",
+        "is_anonymous": false,
+        "created_at": "2026-02-20T10:00:00Z",
+        "updated_at": "2026-03-04T09:00:00Z",
+        "acknowledged_at": "2026-02-21T11:00:00Z",
+        "sla_ack_deadline": "2026-02-23T10:00:00Z",
+        "sla_resolve_deadline": "2026-03-22T10:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF006",
+            "name": "Lakshmi Devi",
+            "designation": "Horticulture Officer",
+            "department": "Horticulture",
+            "phone": "+91-80-2222-3006",
+            "email": "l.devi@bbmp.gov.in",
+            "role": "field_engineer"
+        },
+        "timeline": [
+            {
+                "id": "t28",
+                "timestamp": "2026-02-20T10:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Nandini Murthy"
+            },
+            {
+                "id": "t29",
+                "timestamp": "2026-02-21T11:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Lakshmi Devi",
+                "notes": "Will inspect play equipment."
+            },
+            {
+                "id": "t30",
+                "timestamp": "2026-02-25T14:00:00Z",
+                "action": "Under Review",
+                "actor_type": "officer",
+                "actor_name": "Lakshmi Devi",
+                "notes": "3 swings + 1 slide need complete replacement. Budget approved."
+            },
+            {
+                "id": "t31",
+                "timestamp": "2026-03-04T09:00:00Z",
+                "action": "In Progress",
+                "actor_type": "officer",
+                "actor_name": "Lakshmi Devi",
+                "notes": "New equipment ordered. Installation ETA: March 15."
+            }
+        ],
+        "upvotes": 9
+    },
+    {
+        "id": "GRV-BBMP-2026-00010",
+        "tracking_number": "TRK-J3K6L8M1",
+        "category": "road_pothole",
+        "severity": "high",
+        "title": "Series of potholes on Hosur Road near Silk Board",
+        "description": "Multiple large potholes on Hosur Road near Silk Board junction. Causing severe traffic jams and vehicle damage daily.",
+        "status": "in_progress",
+        "department": "BBMP_Engineering",
+        "location": {
+            "lat": 12.9177,
+            "lng": 77.6230,
+            "address_text": "Hosur Road, near Silk Board",
+            "ward_name": "Koramangala",
+            "ward_id": "W3"
+        },
+        "photo_urls": [],
+        "citizen_name": "Mahesh G",
+        "citizen_phone": "+91-98765-77777",
+        "is_anonymous": false,
+        "created_at": "2026-02-15T08:00:00Z",
+        "updated_at": "2026-03-02T10:00:00Z",
+        "acknowledged_at": "2026-02-16T09:00:00Z",
+        "sla_ack_deadline": "2026-02-18T08:00:00Z",
+        "sla_resolve_deadline": "2026-03-02T08:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF001",
+            "name": "R. Krishnamurthy",
+            "designation": "Assistant Engineer",
+            "department": "BBMP_Engineering",
+            "phone": "+91-80-2222-3001",
+            "email": "r.krishnamurthy@bbmp.gov.in",
+            "role": "field_engineer"
+        },
+        "timeline": [
+            {
+                "id": "t32",
+                "timestamp": "2026-02-15T08:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Mahesh G"
+            },
+            {
+                "id": "t33",
+                "timestamp": "2026-02-16T09:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "R. Krishnamurthy",
+                "notes": "High-priority. Will inspect today."
+            },
+            {
+                "id": "t34",
+                "timestamp": "2026-02-20T11:00:00Z",
+                "action": "Under Review",
+                "actor_type": "officer",
+                "actor_name": "R. Krishnamurthy",
+                "notes": "7 potholes identified. Asphalt resurfacing needed for 200m stretch."
+            },
+            {
+                "id": "t35",
+                "timestamp": "2026-03-02T10:00:00Z",
+                "action": "In Progress",
+                "actor_type": "officer",
+                "actor_name": "R. Krishnamurthy",
+                "notes": "Contractor assigned. Work starts Monday."
+            }
+        ],
+        "upvotes": 34
+    },
+    {
+        "id": "GRV-BBMP-2026-00011",
+        "tracking_number": "TRK-K4L7M9N2",
+        "category": "garbage",
+        "severity": "medium",
+        "title": "Illegal garbage dumping near Jayanagar lake",
+        "description": "Construction debris and household waste being dumped near Jayanagar lake bund. Polluting the lake and breeding mosquitoes.",
+        "status": "acknowledged",
+        "department": "SWM",
+        "location": {
+            "lat": 12.9250,
+            "lng": 77.5790,
+            "address_text": "Near Jayanagar Lake",
+            "ward_name": "Jayanagar",
+            "ward_id": "W4"
+        },
+        "photo_urls": [],
+        "citizen_name": "Geetha Prasad",
+        "citizen_phone": "+91-98765-88888",
+        "is_anonymous": false,
+        "created_at": "2026-03-02T14:00:00Z",
+        "updated_at": "2026-03-04T09:00:00Z",
+        "acknowledged_at": "2026-03-04T09:00:00Z",
+        "sla_ack_deadline": "2026-03-05T14:00:00Z",
+        "sla_resolve_deadline": "2026-04-01T14:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF005",
+            "name": "Venkatesh Rao",
+            "designation": "Sanitary Inspector",
+            "department": "SWM",
+            "phone": "+91-80-2222-3005",
+            "email": "v.rao@bbmp.gov.in",
+            "role": "field_engineer"
+        },
+        "timeline": [
+            {
+                "id": "t36",
+                "timestamp": "2026-03-02T14:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Geetha Prasad"
+            },
+            {
+                "id": "t37",
+                "timestamp": "2026-03-04T09:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Venkatesh Rao",
+                "notes": "Will install CCTV and clean the area."
+            }
+        ],
+        "upvotes": 19
+    },
+    {
+        "id": "GRV-BBMP-2026-00012",
+        "tracking_number": "TRK-L5M8N0P3",
+        "category": "healthcare_access",
+        "severity": "high",
+        "title": "Primary Health Centre in Jayanagar closed for 2 weeks",
+        "description": "The PHC near Jayanagar 9th Block has been closed without notice for 2 weeks. Residents, especially elderly, have to travel 4km to the next clinic.",
+        "status": "submitted",
+        "department": "Health_Dept",
+        "location": {
+            "lat": 12.9200,
+            "lng": 77.5850,
+            "address_text": "9th Block, Jayanagar",
+            "ward_name": "Jayanagar",
+            "ward_id": "W4"
+        },
+        "photo_urls": [],
+        "citizen_name": "Dr. Shashikala",
+        "citizen_phone": "+91-98765-99999",
+        "is_anonymous": false,
+        "created_at": "2026-03-05T08:00:00Z",
+        "updated_at": "2026-03-05T08:00:00Z",
+        "sla_ack_deadline": "2026-03-08T08:00:00Z",
+        "sla_resolve_deadline": "2026-03-20T08:00:00Z",
+        "escalation_level": 0,
+        "accessibility_score_at_filing": 51,
+        "vulnerability_index_at_filing": 68,
+        "timeline": [
+            {
+                "id": "t38",
+                "timestamp": "2026-03-05T08:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Dr. Shashikala",
+                "notes": "PHC has been locked since Feb 20. No notice posted."
+            }
+        ],
+        "upvotes": 41
+    },
+    {
+        "id": "GRV-BBMP-2026-00013",
+        "tracking_number": "TRK-M6N9P1Q4",
+        "category": "noise_pollution",
+        "severity": "medium",
+        "title": "Construction noise from 11 PM to 5 AM on Residency Road",
+        "description": "Ongoing metro construction work on Residency Road is producing extremely loud noise between 11 PM and 5 AM daily, violating noise norms.",
+        "status": "closed",
+        "department": "Traffic_Police",
+        "location": {
+            "lat": 12.9700,
+            "lng": 77.5990,
+            "address_text": "Residency Road",
+            "ward_name": "Koramangala",
+            "ward_id": "W3"
+        },
+        "photo_urls": [],
+        "citizen_name": "Anonymous",
+        "citizen_phone": "+91-98765-00001",
+        "is_anonymous": true,
+        "created_at": "2026-01-15T23:00:00Z",
+        "updated_at": "2026-02-15T10:00:00Z",
+        "acknowledged_at": "2026-01-17T10:00:00Z",
+        "resolved_at": "2026-02-10T14:00:00Z",
+        "closed_at": "2026-02-15T10:00:00Z",
+        "sla_ack_deadline": "2026-01-18T23:00:00Z",
+        "sla_resolve_deadline": "2026-02-14T23:00:00Z",
+        "escalation_level": 0,
+        "resolution_notes": "Construction company fined. Night work restricted to 6 AM–10 PM per BBMP order.",
+        "citizen_satisfaction": 4,
+        "timeline": [
+            {
+                "id": "t39",
+                "timestamp": "2026-01-15T23:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Anonymous"
+            },
+            {
+                "id": "t40",
+                "timestamp": "2026-01-17T10:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Traffic Control",
+                "notes": "Noise complaint registered. Inspection scheduled."
+            },
+            {
+                "id": "t41",
+                "timestamp": "2026-02-10T14:00:00Z",
+                "action": "Resolved",
+                "actor_type": "officer",
+                "actor_name": "Traffic Control",
+                "notes": "Construction company issued notice. Work hours restricted."
+            },
+            {
+                "id": "t42",
+                "timestamp": "2026-02-15T10:00:00Z",
+                "action": "Closed",
+                "actor_type": "system",
+                "actor_name": "System",
+                "notes": "Auto-closed after citizen satisfaction rating."
+            }
+        ],
+        "upvotes": 28
+    },
+    {
+        "id": "GRV-BBMP-2026-00014",
+        "tracking_number": "TRK-N7P0Q2R5",
+        "category": "road_pothole",
+        "severity": "medium",
+        "title": "Broken speed breaker near Malleshwaram Circle",
+        "description": "The speed breaker near Malleshwaram Circle has broken apart, creating a hazard. Sharp edges can damage vehicle undercarriages.",
+        "status": "resolved",
+        "department": "BBMP_Engineering",
+        "location": {
+            "lat": 13.0067,
+            "lng": 77.5700,
+            "address_text": "Malleshwaram Circle",
+            "ward_name": "Malleshwaram",
+            "ward_id": "W2"
+        },
+        "photo_urls": [],
+        "citizen_name": "Harish B",
+        "citizen_phone": "+91-98765-00002",
+        "is_anonymous": false,
+        "created_at": "2026-02-01T12:00:00Z",
+        "updated_at": "2026-02-20T16:00:00Z",
+        "acknowledged_at": "2026-02-02T10:00:00Z",
+        "resolved_at": "2026-02-20T16:00:00Z",
+        "sla_ack_deadline": "2026-02-04T12:00:00Z",
+        "sla_resolve_deadline": "2026-03-03T12:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF001",
+            "name": "R. Krishnamurthy",
+            "designation": "Assistant Engineer",
+            "department": "BBMP_Engineering",
+            "phone": "+91-80-2222-3001",
+            "email": "r.krishnamurthy@bbmp.gov.in",
+            "role": "field_engineer"
+        },
+        "resolution_notes": "Speed breaker rebuilt with proper markings and reflectors.",
+        "citizen_satisfaction": 5,
+        "timeline": [
+            {
+                "id": "t43",
+                "timestamp": "2026-02-01T12:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Harish B"
+            },
+            {
+                "id": "t44",
+                "timestamp": "2026-02-02T10:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "R. Krishnamurthy"
+            },
+            {
+                "id": "t45",
+                "timestamp": "2026-02-20T16:00:00Z",
+                "action": "Resolved",
+                "actor_type": "officer",
+                "actor_name": "R. Krishnamurthy",
+                "notes": "Speed breaker rebuilt."
+            }
+        ],
+        "upvotes": 7
+    },
+    {
+        "id": "GRV-BBMP-2026-00015",
+        "tracking_number": "TRK-P8Q1R3S6",
+        "category": "water_supply",
+        "severity": "medium",
+        "title": "Water pipeline leak on Bull Temple Road",
+        "description": "Major water leak from underground pipeline on Bull Temple Road. Water wasting continuously for 3 days. Road surface is also getting damaged.",
+        "status": "in_progress",
+        "department": "BWSSB",
+        "location": {
+            "lat": 12.9440,
+            "lng": 77.5680,
+            "address_text": "Bull Temple Road",
+            "ward_name": "Jayanagar",
+            "ward_id": "W4"
+        },
+        "photo_urls": [],
+        "citizen_name": "Mohan Rao",
+        "citizen_phone": "+91-98765-00003",
+        "is_anonymous": false,
+        "created_at": "2026-02-28T07:00:00Z",
+        "updated_at": "2026-03-04T11:00:00Z",
+        "acknowledged_at": "2026-03-01T09:00:00Z",
+        "sla_ack_deadline": "2026-03-03T07:00:00Z",
+        "sla_resolve_deadline": "2026-03-30T07:00:00Z",
+        "escalation_level": 0,
+        "assigned_officer": {
+            "id": "OFF002",
+            "name": "Priya Sharma",
+            "designation": "Junior Engineer",
+            "department": "BWSSB",
+            "phone": "+91-80-2222-3002",
+            "email": "p.sharma@bwssb.gov.in",
+            "role": "field_engineer"
+        },
+        "timeline": [
+            {
+                "id": "t46",
+                "timestamp": "2026-02-28T07:00:00Z",
+                "action": "Grievance Submitted",
+                "actor_type": "citizen",
+                "actor_name": "Mohan Rao"
+            },
+            {
+                "id": "t47",
+                "timestamp": "2026-03-01T09:00:00Z",
+                "action": "Acknowledged",
+                "actor_type": "officer",
+                "actor_name": "Priya Sharma",
+                "notes": "Pipeline leak confirmed. Emergency repair needed."
+            },
+            {
+                "id": "t48",
+                "timestamp": "2026-03-04T11:00:00Z",
+                "action": "In Progress",
+                "actor_type": "officer",
+                "actor_name": "Priya Sharma",
+                "notes": "Excavation underway. Pipe replacement scheduled for tomorrow."
+            }
+        ],
+        "upvotes": 14
+    }
+]

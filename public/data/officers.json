@@ -1,0 +1,112 @@
+[
+    {
+        "id": "OFF001",
+        "name": "R. Krishnamurthy",
+        "designation": "Assistant Engineer",
+        "department": "BBMP_Engineering",
+        "ward_id": "W1",
+        "phone": "+91-80-2222-3001",
+        "email": "r.krishnamurthy@bbmp.gov.in",
+        "role": "field_engineer"
+    },
+    {
+        "id": "OFF002",
+        "name": "Priya Sharma",
+        "designation": "Junior Engineer",
+        "department": "BWSSB",
+        "ward_id": "W1",
+        "phone": "+91-80-2222-3002",
+        "email": "p.sharma@bwssb.gov.in",
+        "role": "field_engineer"
+    },
+    {
+        "id": "OFF003",
+        "name": "Suresh Babu",
+        "designation": "Ward Health Officer",
+        "department": "Health_Dept",
+        "ward_id": "W2",
+        "phone": "+91-80-2222-3003",
+        "email": "s.babu@bbmp.gov.in",
+        "role": "field_engineer"
+    },
+    {
+        "id": "OFF004",
+        "name": "Meena Kumari",
+        "designation": "Assistant Engineer",
+        "department": "BESCOM",
+        "ward_id": "W2",
+        "phone": "+91-80-2222-3004",
+        "email": "m.kumari@bescom.gov.in",
+        "role": "field_engineer"
+    },
+    {
+        "id": "OFF005",
+        "name": "Venkatesh Rao",
+        "designation": "Sanitary Inspector",
+        "department": "SWM",
+        "ward_id": "W3",
+        "phone": "+91-80-2222-3005",
+        "email": "v.rao@bbmp.gov.in",
+        "role": "field_engineer"
+    },
+    {
+        "id": "OFF006",
+        "name": "Lakshmi Devi",
+        "designation": "Horticulture Officer",
+        "department": "Horticulture",
+        "ward_id": "W3",
+        "phone": "+91-80-2222-3006",
+        "email": "l.devi@bbmp.gov.in",
+        "role": "field_engineer"
+    },
+    {
+        "id": "OFF007",
+        "name": "Anil Kumar",
+        "designation": "Assistant Engineer",
+        "department": "BBMP_Engineering",
+        "ward_id": "W4",
+        "phone": "+91-80-2222-3007",
+        "email": "a.kumar@bbmp.gov.in",
+        "role": "field_engineer"
+    },
+    {
+        "id": "OFF008",
+        "name": "Rajesh Gowda",
+        "designation": "Ward Supervisor",
+        "department": "BBMP_Engineering",
+        "ward_id": "W1",
+        "phone": "+91-80-2222-4001",
+        "email": "r.gowda@bbmp.gov.in",
+        "role": "ward_supervisor"
+    },
+    {
+        "id": "OFF009",
+        "name": "Shantha Murthy",
+        "designation": "Ward Supervisor",
+        "department": "BWSSB",
+        "ward_id": "W2",
+        "phone": "+91-80-2222-4002",
+        "email": "s.murthy@bwssb.gov.in",
+        "role": "ward_supervisor"
+    },
+    {
+        "id": "OFF010",
+        "name": "Nagaraj Shetty",
+        "designation": "Zonal Commissioner",
+        "department": "BBMP_Engineering",
+        "ward_id": "ALL",
+        "phone": "+91-80-2222-5001",
+        "email": "n.shetty@bbmp.gov.in",
+        "role": "zonal_commissioner"
+    },
+    {
+        "id": "OFF011",
+        "name": "Dr. Kavitha Reddy",
+        "designation": "BBMP Commissioner",
+        "department": "General_BBMP",
+        "ward_id": "ALL",
+        "phone": "+91-80-2222-6001",
+        "email": "commissioner@bbmp.gov.in",
+        "role": "commissioner"
+    }
+]

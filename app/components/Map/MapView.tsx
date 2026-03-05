@@ -6,6 +6,7 @@ import { GridCell, Facility } from '../../types';
 import HexGridLayer from './HexGridLayer';
 import FacilityMarkers from './FacilityMarkers';
 import SimulationLayer from './SimulationLayer';
+import GrievanceMapLayer from '../Grievances/GrievanceMapLayer';
 
 interface MapViewProps {
     cells: GridCell[];
@@ -64,6 +65,8 @@ export default function MapView({ cells, facilities, selectedCellId, onCellClick
                         onPlaceFacility={onPlaceFacility}
                     />
                 )}
+
+                <GrievanceMapLayer visible={!isSimulating} />
             </MapContainer>
         </div>
     );
