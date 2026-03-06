@@ -6,9 +6,6 @@ import { X, Users, Activity, Download, Shield, TrendingUp, Phone, MapPin, Clock,
 import { Button } from '@/components/ui/button';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, LineChart, Line, CartesianGrid } from 'recharts';
 import { METRIC_DEFINITIONS } from '@/app/constants/metrics';
-import EmailPromptModal from '../UI/EmailPromptModal';
-
-function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)); }
 
 function MetricTooltip({ metricKey }: { metricKey: string }) {
     const def = METRIC_DEFINITIONS[metricKey];
@@ -33,6 +30,8 @@ interface WardDetailPageProps {
     onGenerateReport: () => void;
 }
 
+const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
+
 const SERVICE_ICONS: Record<string, string> = {
     hospital: '🏥', school: '🏫', bus_stop: '🚌', police_station: '🚔', fire_station: '🚒',
 };
@@ -55,8 +54,6 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
     const [contacts, setContacts] = useState<Record<string, ContactEntry[]> | null>(null);
     const [contactsLoading, setContactsLoading] = useState(false);
     const [showMethodology, setShowMethodology] = useState(false);
-    const [showFollowModal, setShowFollowModal] = useState(false);
-    const [followerCount, setFollowerCount] = useState<number | null>(null);
 
     const cityAvg = allCells.length > 0 ? Math.round(allCells.reduce((sum, c) => sum + c.accessibility_score, 0) / allCells.length) : 0;
     const wardCells = allCells.filter(c => c.ward_name === cell.ward_name);
@@ -74,25 +71,7 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
         }
     }, [activeTab, cell.cell_id, contacts]);
 
-    useEffect(() => {
-        fetch(`http://localhost:8000/api/wards/${encodeURIComponent(cell.ward_name)}/followers`)
-            .then(r => r.json())
-            .then(d => setFollowerCount(d.follower_count))
-            .catch(() => {});
-    }, [cell.ward_name]);
 
-    const handleFollow = async (email: string) => {
-        try {
-            const res = await fetch(`http://localhost:8000/api/wards/${encodeURIComponent(cell.ward_name)}/follow`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            }).then(r => r.json());
-            if (res.follower_count !== undefined) {
-                setFollowerCount(res.follower_count);
-            }
-        } catch { }
-    };
 
     const getScoreColor = (s: number) => s >= 80 ? 'text-emerald-600' : s >= 60 ? 'text-yellow-600' : s >= 40 ? 'text-orange-500' : 'text-red-500';
     const getBarColor = (dist: number) => dist > 3 ? '#ef4444' : dist > 1.5 ? '#f59e0b' : '#10b981';
@@ -147,9 +126,6 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                         </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                        <Button variant="outline" onClick={() => setShowFollowModal(true)} className="border-orange-200 text-orange-600 hover:bg-orange-50 text-xs font-bold px-4">
-                            <Users className="w-3 h-3 mr-1.5" /> Follow Update{followerCount !== null ? `s (${followerCount})` : 's'}
-                        </Button>
                         <Button variant="outline" onClick={() => setShowMethodology(true)} className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs font-bold px-4">
                             <Info className="w-3 h-3 mr-1.5" /> Methodology
                         </Button>

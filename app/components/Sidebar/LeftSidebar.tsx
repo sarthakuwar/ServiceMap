@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Map, Activity, BarChart3, Shield, Eye, EyeOff, MessageSquareWarning, AlertTriangle, Bell } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { GridCell } from '@/app/types';
 
 interface LeftSidebarProps {
     activeView: 'map' | 'sim' | 'rank' | 'report' | 'grievances';
@@ -15,6 +16,7 @@ interface LeftSidebarProps {
     grievanceCount?: number;
     unreadUpdates?: number;
     onToggleUpdates?: () => void;
+    cells?: GridCell[];
 }
 
 const FACILITY_LAYERS = [
@@ -25,7 +27,7 @@ const FACILITY_LAYERS = [
     { key: 'fire_station', label: 'Fire Stations', icon: '🚒', color: 'text-orange-500' },
 ];
 
-export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, impactSummary, vulnerabilityMode = false, setVulnerabilityMode, visibleFacilities = [], setVisibleFacilities, onReportIssue, grievanceCount, unreadUpdates = 0, onToggleUpdates }: LeftSidebarProps) {
+export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, impactSummary, vulnerabilityMode = false, setVulnerabilityMode, visibleFacilities = [], setVisibleFacilities, onReportIssue, grievanceCount, unreadUpdates = 0, onToggleUpdates, cells = [] }: LeftSidebarProps) {
     const getScoreColor = (s: number) => s >= 80 ? 'bg-emerald-500' : s >= 60 ? 'bg-yellow-500' : s >= 40 ? 'bg-orange-500' : 'bg-red-500';
     const getScoreTextColor = (s: number) => s >= 80 ? 'text-emerald-600' : s >= 60 ? 'text-yellow-600' : s >= 40 ? 'text-orange-500' : 'text-red-500';
 
@@ -137,6 +139,26 @@ export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, i
                             <div className={`w-4 h-4 rounded-full bg-white shadow-sm absolute top-0.5 transition-all ${vulnerabilityMode ? 'right-0.5' : 'left-0.5'}`}></div>
                         </div>
                     </button>
+
+                    {vulnerabilityMode && cells && cells.length > 0 && (
+                        <div className="mt-3 bg-red-50/50 rounded-xl p-3 border border-red-100">
+                            <h4 className="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-2 flex items-center">
+                                <AlertTriangle className="w-3 h-3 mr-1" /> High Risk Areas
+                            </h4>
+                            <div className="space-y-2">
+                                {cells
+                                    .filter(c => c.vulnerability_index !== undefined)
+                                    .sort((a, b) => (b.vulnerability_index || 0) - (a.vulnerability_index || 0))
+                                    .slice(0, 3)
+                                    .map((cell, idx) => (
+                                        <div key={cell.cell_id} className="flex justify-between items-center text-xs">
+                                            <span className="text-slate-700 font-medium truncate pr-2">{idx + 1}. {cell.ward_name}</span>
+                                            <span className="font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded">{cell.vulnerability_index}</span>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Report Issue */}

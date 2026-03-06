@@ -12,7 +12,6 @@ import {
     GovernmentDepartment
 } from '@/app/types';
 import GrievanceTimeline from './GrievanceTimeline';
-import EmailPromptModal from '../UI/EmailPromptModal';
 
 interface Props {
     onClose?: () => void;
@@ -25,7 +24,6 @@ export default function GrievanceDashboard({ onClose }: Props) {
     const [stats, setStats] = useState<GrievanceDashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedGrievance, setSelectedGrievance] = useState<Grievance | null>(null);
-    const [showFollowModal, setShowFollowModal] = useState(false);
 
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [filterWard, setFilterWard] = useState<string>('all');
@@ -47,34 +45,6 @@ export default function GrievanceDashboard({ onClose }: Props) {
         } catch (err) {
             console.error('Failed to load grievances:', err);
         }
-        setLoading(false);
-    };
-
-    const handleUpvote = async (gid: string) => {
-        try {
-            await fetch(`${API}/api/grievances/${gid}/upvote`, { method: 'PUT' });
-            // Update local state and selected if same
-            setGrievances(prev => prev.map(g => g.id === gid ? { ...g, upvotes: (g.upvotes || 0) + 1 } : g));
-            if (selectedGrievance && selectedGrievance.id === gid) {
-                setSelectedGrievance({ ...selectedGrievance, upvotes: (selectedGrievance.upvotes || 0) + 1 });
-            }
-        } catch { }
-    };
-
-    const handleFollow = async (email: string) => {
-        if (!selectedGrievance) return;
-        try {
-            await fetch(`${API}/api/grievances/${selectedGrievance.id}/follow`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-            // Reload silently to fetch fresh followers
-            const gRes = await fetch(`${API}/api/grievances`).then(r => r.json());
-            setGrievances(gRes);
-            const fresh = gRes.find((g: Grievance) => g.id === selectedGrievance.id);
-            if (fresh) setSelectedGrievance(fresh);
-        } catch { }
     };
 
     const filtered = grievances.filter(g => {
@@ -200,16 +170,6 @@ export default function GrievanceDashboard({ onClose }: Props) {
                             <p className="text-[9px] text-orange-500 uppercase tracking-wider font-bold">Tracking Number</p>
                             <p className="text-lg font-bold text-orange-800 font-mono">{g.tracking_number}</p>
                         </div>
-                        <div className="flex items-center space-x-2">
-                            <button onClick={() => setShowFollowModal(true)} className="flex items-center space-x-1 bg-white/80 px-3 py-1.5 rounded-lg border border-orange-200 hover:bg-orange-100 transition-colors">
-                                <Users className="w-3.5 h-3.5 text-orange-600" />
-                                <span className="text-xs font-bold text-orange-700">Follow ({g.followers?.length || 0})</span>
-                            </button>
-                            <button onClick={() => handleUpvote(g.id)} className="flex items-center space-x-1 bg-white/80 px-3 py-1.5 rounded-lg border border-orange-200 hover:bg-orange-100 transition-colors">
-                                <ThumbsUp className="w-3.5 h-3.5 text-orange-600" />
-                                <span className="text-xs font-bold text-orange-700">{g.upvotes || 0}</span>
-                            </button>
-                        </div>
                     </div>
 
                     {/* Timeline */}
@@ -219,14 +179,6 @@ export default function GrievanceDashboard({ onClose }: Props) {
                     </div>
                 </div>
 
-                <EmailPromptModal
-                    isOpen={showFollowModal}
-                    onClose={() => setShowFollowModal(false)}
-                    onSubmit={handleFollow}
-                    title="Follow this Issue"
-                    description="Get email notifications whenever the status of this grievance changes."
-                    entityName="this grievance"
-                />
             </div>
         );
     }
@@ -350,11 +302,7 @@ export default function GrievanceDashboard({ onClose }: Props) {
                                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${g.severity === 'critical' ? 'bg-red-100 text-red-600' : g.severity === 'high' ? 'bg-orange-100 text-orange-600' : g.severity === 'medium' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'}`}>
                                     {g.severity?.toUpperCase()}
                                 </span>
-                                <div className="flex items-center space-x-1 text-slate-400">
-                                    <ThumbsUp className="w-3 h-3" />
-                                    <span className="text-[10px] font-bold">{g.upvotes || 0}</span>
-                                </div>
-                                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors mt-2" />
                             </div>
                         </div>
                     </button>

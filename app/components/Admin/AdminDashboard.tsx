@@ -61,7 +61,7 @@ export default function AdminDashboard() {
             await fetch(`${API}/api/grievances/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ new_status: newStatus, notes })
+                body: JSON.stringify({ new_status: newStatus, notes, officer_name: "Admin User" })
             });
             await loadData();
         } catch (e) {
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
             await fetch(`${API}/api/grievances/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ new_status: 'resolved', notes })
+                body: JSON.stringify({ new_status: 'resolved', notes, officer_name: "Admin User" })
             });
             await loadData();
         } catch (e) {

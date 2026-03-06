@@ -14,7 +14,6 @@ import LeftSidebar from './components/Sidebar/LeftSidebar';
 import RightPanel from './components/Sidebar/RightPanel';
 import StatsBar from './components/UI/StatsBar';
 import SimulationToolbar from './components/Panels/SimulationToolbar';
-import InsightsPanel from './components/Panels/InsightsPanel';
 import LeaderboardPanel from './components/Panels/LeaderboardPanel';
 import GovernancePanel from './components/Panels/GovernancePanel';
 import AIChatbot from './components/UI/AIChatbot';
@@ -218,6 +217,7 @@ export default function Home() {
         grievanceCount={pendingGrievances}
         unreadUpdates={unreadUpdatesCount}
         onToggleUpdates={handleToggleUpdates}
+        cells={isSimulating ? simulatedCells : gridCells}
       />
 
       <main className="flex-1 relative flex">
@@ -251,10 +251,6 @@ export default function Home() {
         {/* Main Dashboard Overlays */}
         {activeView === 'map' && (
           <>
-            <div className="absolute top-20 right-6 z-[1000] w-[320px]">
-              <InsightsPanel insights={insights} cells={isSimulating ? simulatedCells : gridCells} recommendations={recommendations} />
-            </div>
-
             <RightPanel
               cell={selectedCell}
               onClose={() => setSelectedCellId(null)}

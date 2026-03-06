@@ -33,16 +33,6 @@ from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from email_service import (
-    send_grievance_submitted,
-    send_grievance_acknowledged,
-    send_status_update,
-    send_escalation_alert,
-    send_resolution_notification,
-    send_follow_confirmation,
-    send_government_update,
-)
-
 # ─── App Setup ────────────────────────────────────────────────────────────────
 
 app = FastAPI(
@@ -458,8 +448,6 @@ OFFICERS: list = list(officers_raw)
 
 GRIEVANCE_COUNTER = len(GRIEVANCES) + 1
 
-WARD_FOLLOWERS: dict[str, list[str]] = defaultdict(list)
-
 CATEGORY_TO_DEPT = {
     "road_pothole": "BBMP_Engineering",
     "water_supply": "BWSSB",
@@ -511,12 +499,7 @@ class GrievanceStatusUpdate(BaseModel):
     new_status: str
     officer_id: str
     officer_name: str
-    notes: str = ""
     reopen: bool = False
-
-
-class FollowRequest(BaseModel):
-    email: str
 
 
 class UpdateRequest(BaseModel):
@@ -574,9 +557,6 @@ def _check_sla(grievances: list) -> list:
                     "actor_name": "System",
                     "notes": "Escalated to Ward Supervisor per CPGRAMS norms.",
                 })
-                # Attempt to alert supervisor and officer
-                officer_email = g.get("assigned_officer", {}).get("email")
-                send_escalation_alert(officer_email, "supervisor@servicemap.in", g)
         # Resolution SLA
         if g["status"] in ("acknowledged", "under_review", "in_progress", "escalated"):
             resolve_deadline = datetime.fromisoformat(g["sla_resolve_deadline"].replace("Z", "+00:00")).replace(tzinfo=None)
@@ -592,8 +572,6 @@ def _check_sla(grievances: list) -> list:
                     "actor_name": "System",
                     "notes": f"Escalated to {level_name}. Level {g['escalation_level']}.",
                 })
-                officer_email = g.get("assigned_officer", {}).get("email")
-                send_escalation_alert(officer_email, f"{level_name.lower().replace(' ', '_')}@servicemap.in", g)
     return grievances
 
 
@@ -651,14 +629,9 @@ def create_grievance(req: GrievanceCreate):
             "actor_name": "Anonymous" if req.is_anonymous else req.citizen_name,
             "notes": "Filed via ServiceMap platform.",
         }],
-        "upvotes": 0,
-        "followers": [req.citizen_email] if req.citizen_email else [],
     }
     
     GRIEVANCES.append(grievance)
-    
-    if req.citizen_email:
-        send_grievance_submitted(req.citizen_email, grievance)
         
     return {
         "id": gid,
@@ -820,10 +793,6 @@ def acknowledge_grievance(gid: str, req: GrievanceAcknowledge):
         "notes": req.notes or f"Acknowledged by {req.officer_name}, {req.officer_designation}.",
     })
     
-    citizen_email = g.get("citizen_email")
-    officer_email = officer.get("email") if officer else None
-    if citizen_email or officer_email:
-        send_grievance_acknowledged(citizen_email, officer_email, g)
     
     return {"status": "acknowledged", "acknowledged_at": g["acknowledged_at"]}
 
@@ -861,11 +830,6 @@ def update_grievance_status(gid: str, req: GrievanceStatusUpdate):
         "actor_name": req.officer_name,
         "notes": req.notes,
     })
-    
-    citizen_email = g.get("citizen_email")
-    followers = g.get("followers", [])
-    if citizen_email or followers:
-        send_status_update(citizen_email, followers, g, req.new_status, req.notes)
     
     return {"status": g["status"], "updated_at": g["updated_at"]}
 
@@ -905,10 +869,6 @@ def verify_grievance(gid: str, req: CitizenVerification):
             "actor_name": g.get("citizen_name", "Citizen"),
             "notes": req.feedback or f"Rated {req.satisfaction}/5.",
         })
-        citizen_email = g.get("citizen_email")
-        followers = g.get("followers", [])
-        if citizen_email or followers:
-            send_resolution_notification(citizen_email, followers, g)
     
     return {"status": g["status"]}
 
@@ -918,49 +878,6 @@ def list_officers():
     """List all officers."""
     return OFFICERS
 
-
-@app.put("/api/grievances/{gid}/upvote")
-def upvote_grievance(gid: str):
-    """Increment upvote count."""
-    g = next((g for g in GRIEVANCES if g["id"] == gid), None)
-    if not g:
-        raise HTTPException(404, "Grievance not found.")
-    g["upvotes"] = g.get("upvotes", 0) + 1
-    return {"upvotes": g["upvotes"]}
-
-
-@app.put("/api/grievances/{gid}/follow")
-def follow_grievance(gid: str, req: FollowRequest):
-    """Add follower to grievance."""
-    g = next((g for g in GRIEVANCES if g["id"] == gid), None)
-    if not g:
-        raise HTTPException(404, "Grievance not found.")
-    
-    if "followers" not in g:
-        g["followers"] = []
-    
-    if req.email not in g["followers"]:
-        g["followers"].append(req.email)
-        send_follow_confirmation(req.email, "grievance", g["tracking_number"])
-        
-    return {"followers": len(g["followers"])}
-
-
-@app.put("/api/wards/{ward_name}/follow")
-def follow_ward(ward_name: str, req: FollowRequest):
-    """Add follower to a ward."""
-    normalized_ward = ward_name.lower()
-    if req.email not in WARD_FOLLOWERS[normalized_ward]:
-        WARD_FOLLOWERS[normalized_ward].append(req.email)
-        send_follow_confirmation(req.email, "ward", ward_name.title())
-        
-    return {"followers": len(WARD_FOLLOWERS[normalized_ward])}
-
-
-@app.get("/api/wards/{ward_name}/followers")
-def get_ward_followers(ward_name: str):
-    """Get follower count for a ward."""
-    return {"followers": len(WARD_FOLLOWERS[ward_name.lower()])}
 
 
 @app.get("/api/updates")
@@ -974,17 +891,7 @@ def list_updates(ward_name: Optional[str] = None):
 @app.post("/api/updates")
 def create_update(req: UpdateRequest):
     """Broadcast an update to followers."""
-    target_emails = []
-    if req.ward_name:
-        target_emails = WARD_FOLLOWERS[req.ward_name.lower()]
-    else:
-        # If city-wide, could collect all followers (omitted for brevity)
-        pass
-        
     emails_sent = 0
-    if target_emails:
-        send_government_update(target_emails, req.message, req.officer_name, req.ward_name)
-        emails_sent = len(target_emails)
         
     update_doc = {
         "id": str(uuid.uuid4())[:8],
@@ -1020,10 +927,6 @@ def root():
             "/api/grievances/{id}/acknowledge",
             "/api/grievances/{id}/status",
             "/api/grievances/{id}/verify",
-            "/api/grievances/{id}/follow",
-            "/api/grievances/{id}/upvote",
-            "/api/wards/{ward_name}/follow",
-            "/api/wards/{ward_name}/followers",
             "/api/updates",
             "/api/officers",
         ],

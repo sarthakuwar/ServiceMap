@@ -1,11 +1,9 @@
 import { GridCell, Facility, Recommendation } from "../types";
 
-const GEMINI_API_KEY = "";
+const GEMINI_API_KEY = "AIzaSyDzEy7zyVwxsiAXNLHPs9NyMIgR2LR3w_U";
 
 const GEMINI_MODELS = [
   "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-lite",
 ];
 
 function getGeminiUrl(model: string) {
@@ -214,13 +212,13 @@ export async function generateAIInsights(
 
   const prompt = `${context}
 
-Based on the above data, generate exactly 5 actionable infrastructure insights as a JSON array. Each insight should have:
+Based on the above single-ward data, generate exactly 3 actionable infrastructure insights tailored specifically for this ward as a JSON array. Each insight should have:
 - "id": unique string like "ai_insight_1"
 - "title": short punchy title (3-5 words)
 - "description": one sentence with specific data points
-- "type": one of "negative", "positive", "city-wide"
-- "ward_name": the relevant ward name (optional, omit for city-wide)
-- "priority": number 1-5 (1=most urgent)
+- "type": one of "negative", "positive"
+- "ward_name": the relevant ward name (must be included)
+- "priority": number 1-3 (1=most urgent)
 
 Prioritize: critical gaps first, then disparities, then positive highlights.
 Return ONLY the JSON array, no markdown formatting or code blocks.`;
@@ -245,4 +243,29 @@ Return ONLY the JSON array, no markdown formatting or code blocks.`;
     console.error("Gemini insights error:", err);
     return "";
   }
+}
+
+export async function generateVulnerabilityPlan(cell: GridCell): Promise<string> {
+    const prompt = `You are an urban planner assistant analyzing Bangalore's infrastructure.
+Analyze Ward: ${cell.ward_name} (Population: ${(cell.population_estimate / 1000).toFixed(1)}k).
+Vulnerability Index: ${cell.vulnerability_index || 0}/100.
+Accessibility Score: ${cell.accessibility_score}/100.
+Local Service Distances (km): Hospital ${cell.service_distances.hospital.toFixed(2)}, School ${cell.service_distances.school.toFixed(2)}, Transit ${cell.service_distances.bus_stop.toFixed(2)}, Police ${cell.service_distances.police_station.toFixed(2)}, Fire ${cell.service_distances.fire_station.toFixed(2)}.
+
+Based on the high vulnerability, identify the top contributing factors (e.g. high population with poor critical service access) and provide a concrete, 3-step mitigation action plan designed for local policymakers.
+Keep it strictly to 3 short paragraphs or bullet points. No conversational filler. Use bold text for emphasis formatting.`;
+
+    try {
+        const data = await callGeminiWithFallback({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: {
+                temperature: 0.5,
+                maxOutputTokens: 600,
+            },
+        });
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to generate plan at this time.";
+    } catch (err) {
+        console.error("Gemini plan error:", err);
+        return "Connection error while generating AI Action Plan.";
+    }
 }

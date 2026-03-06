@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { GridCell, ContactEntry } from '@/app/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Users, Activity, Download, MessageSquare, Send, Phone, MapPin, Clock, AlertTriangle, Shield } from 'lucide-react';
+import { X, Users, Activity, Download, MessageSquare, Send, Phone, MapPin, Clock, AlertTriangle, Shield, Sparkles } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
-import EmailPromptModal from '../UI/EmailPromptModal';
+import InsightsPanel from '../Panels/InsightsPanel';
+import { generateVulnerabilityPlan } from '@/app/utils/geminiApi';
 
 interface RightPanelProps {
     cell: GridCell | null;
@@ -32,8 +33,8 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
     const [localComments, setLocalComments] = useState<string[]>([]);
     const [contacts, setContacts] = useState<Record<string, ContactEntry[]> | null>(null);
     const [contactsLoading, setContactsLoading] = useState(false);
-    const [showFollowModal, setShowFollowModal] = useState(false);
-    const [followerCount, setFollowerCount] = useState<number | null>(null);
+    const [vulnAIPlan, setVulnAIPlan] = useState<string | null>(null);
+    const [isGeneratingVulnPlan, setIsGeneratingVulnPlan] = useState(false);
 
     useEffect(() => {
         if (cell && activeTab === 'contacts' && !contacts) {
@@ -49,26 +50,15 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
         if (!cell) return;
         setContacts(null);
         setActiveTab('overview');
-        
-        // Fetch follower count
-        fetch(`http://localhost:8000/api/wards/${encodeURIComponent(cell.ward_name)}/followers`)
-            .then(r => r.json())
-            .then(d => setFollowerCount(d.follower_count))
-            .catch(() => {});
+        setVulnAIPlan(null);
     }, [cell?.cell_id, cell?.ward_name]);
 
-    const handleFollow = async (email: string) => {
+    const handleGenerateVulnPlan = async () => {
         if (!cell) return;
-        try {
-            const res = await fetch(`http://localhost:8000/api/wards/${encodeURIComponent(cell.ward_name)}/follow`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            }).then(r => r.json());
-            if (res.follower_count !== undefined) {
-                setFollowerCount(res.follower_count);
-            }
-        } catch { }
+        setIsGeneratingVulnPlan(true);
+        const plan = await generateVulnerabilityPlan(cell);
+        setVulnAIPlan(plan);
+        setIsGeneratingVulnPlan(false);
     };
 
     if (!cell) return null;
@@ -95,9 +85,6 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
                     <h2 className="text-xl font-bold text-slate-900">{cell.ward_name}</h2>
                     <div className="flex items-center space-x-3 mt-1">
                         <p className="text-xs text-slate-400 font-medium">Zone: South Bangalore</p>
-                        <button onClick={() => setShowFollowModal(true)} className="text-[10px] font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2 py-0.5 rounded-full transition-colors flex items-center">
-                            <Users className="w-3 h-3 mr-1" /> Follow{followerCount !== null ? ` (${followerCount})` : ''}
-                        </button>
                     </div>
                 </div>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
@@ -140,9 +127,14 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
                             </p>
                         </div>
 
+                        {/* AI Insights specific to this ward */}
+                        <div className="my-6">
+                            <InsightsPanel insights={[]} cells={[cell]} />
+                        </div>
+
                         {/* Vulnerability Index */}
                         {cell.vulnerability_index !== undefined && (
-                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-4">
                                 <div className="flex justify-between items-center mb-2">
                                     <div className="flex items-center">
                                         <Shield className="w-4 h-4 mr-2 text-purple-500" />
@@ -158,9 +150,44 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
                                         style={{ width: `${cell.vulnerability_index}%` }}
                                     ></div>
                                 </div>
-                                <p className="text-xs text-slate-400 mt-2">
+                                <p className="text-xs text-slate-400 mt-2 mb-4">
                                     Fairness-adjusted score: <span className="text-slate-600 font-medium">{cell.fairness_adjusted_score ?? cell.accessibility_score}</span>/100
                                 </p>
+                                
+                                <div className="pt-4 border-t border-slate-200">
+                                    <p className="text-xs text-slate-500 font-medium leading-relaxed mb-3">
+                                        This ward's vulnerability is influenced by multi-dimensional factors including critical infrastructure access, demographic data, and current service availability.
+                                    </p>
+                                    
+                                    {!vulnAIPlan && !isGeneratingVulnPlan && (
+                                        <button 
+                                            onClick={handleGenerateVulnPlan}
+                                            className="w-full flex items-center justify-center p-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-bold transition-colors"
+                                        >
+                                            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                                            Generate AI Action Plan
+                                        </button>
+                                    )}
+                                    
+                                    {isGeneratingVulnPlan && (
+                                        <div className="flex items-center justify-center space-x-2 text-purple-600 p-2 text-xs font-bold bg-purple-50 rounded-lg">
+                                            <div className="animate-spin w-3.5 h-3.5 border-2 border-purple-500 border-t-transparent rounded-full" />
+                                            <span>Analyzing vulnerabilities...</span>
+                                        </div>
+                                    )}
+                                    
+                                    {vulnAIPlan && (
+                                        <div className="bg-white p-3 rounded-lg border border-purple-100 shadow-sm mt-3">
+                                            <h4 className="text-[10px] font-bold text-purple-800 uppercase tracking-widest mb-2 flex items-center">
+                                                <Sparkles className="w-3 h-3 mr-1" />
+                                                Suggested Mitigation Plan
+                                            </h4>
+                                            <div className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                                {vulnAIPlan}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
 
@@ -359,14 +386,6 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
                 </Button>
             </div>
 
-            <EmailPromptModal
-                isOpen={showFollowModal}
-                onClose={() => setShowFollowModal(false)}
-                onSubmit={handleFollow}
-                title={`Follow ${cell.ward_name}`}
-                description="Get email notifications about infrastructure updates and government announcements in this ward."
-                entityName="this ward"
-            />
         </div>
     );
 }
