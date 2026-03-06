@@ -497,8 +497,9 @@ class GrievanceAcknowledge(BaseModel):
 
 class GrievanceStatusUpdate(BaseModel):
     new_status: str
-    officer_id: str
-    officer_name: str
+    officer_id: str = "OFF-ADMIN"
+    officer_name: str = "Admin User"
+    notes: str = ""
     reopen: bool = False
 
 

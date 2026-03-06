@@ -18,6 +18,9 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         loadData();
+        // Poll every 15 seconds for fresh data
+        const interval = setInterval(loadData, 15000);
+        return () => clearInterval(interval);
     }, []);
 
     const loadData = async () => {
@@ -41,8 +44,8 @@ export default function AdminDashboard() {
             await fetch(`${API}/api/grievances/${id}/acknowledge`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    officer_id: "OFF-001", 
+                body: JSON.stringify({
+                    officer_id: "OFF-001",
                     officer_name: "Admin User",
                     officer_designation: "System Administrator",
                     notes: "Issue formally acknowledged by government."
@@ -55,15 +58,24 @@ export default function AdminDashboard() {
         setProcessing(false);
     };
 
+    const notifyOtherTabs = () => {
+        try {
+            const bc = new BroadcastChannel('grievance_updates');
+            bc.postMessage({ type: 'grievance_state_changed', timestamp: Date.now() });
+            bc.close();
+        } catch (e) { /* BroadcastChannel not supported */ }
+    };
+
     const handleUpdateStatus = async (id: string, newStatus: string, notes: string = '') => {
         setProcessing(true);
         try {
             await fetch(`${API}/api/grievances/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ new_status: newStatus, notes, officer_name: "Admin User" })
+                body: JSON.stringify({ new_status: newStatus, notes, officer_name: "Admin User", officer_id: "OFF-ADMIN" })
             });
             await loadData();
+            notifyOtherTabs();
         } catch (e) {
             console.error(e);
         }
@@ -73,21 +85,22 @@ export default function AdminDashboard() {
     const handleResolve = async (id: string) => {
         const notes = prompt("Enter resolution notes (optional):");
         if (notes === null) return; // cancelled
-        
+
         setProcessing(true);
         try {
             await fetch(`${API}/api/grievances/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ new_status: 'resolved', notes, officer_name: "Admin User" })
+                body: JSON.stringify({ new_status: 'resolved', notes, officer_name: "Admin User", officer_id: "OFF-ADMIN" })
             });
             await loadData();
+            notifyOtherTabs();
         } catch (e) {
             console.error(e);
         }
         setProcessing(false);
     };
-    
+
     // Sort so pending issues are at the top
     const sortedGrid = [...grievances].sort((a, b) => {
         if (a.status === 'submitted' && b.status !== 'submitted') return -1;
@@ -122,14 +135,14 @@ export default function AdminDashboard() {
                     </div>
                 </div>
                 <div className="p-4 space-y-2 flex-1">
-                    <button 
+                    <button
                         onClick={() => setActiveTab('overview')}
                         className={`w-full flex items-center p-3 rounded-lg font-medium text-sm transition-colors ${activeTab === 'overview' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
                     >
                         <BarChart3 className="w-4 h-4 mr-3" />
                         Overview
                     </button>
-                    <button 
+                    <button
                         onClick={() => setActiveTab('triage')}
                         className={`w-full flex items-center p-3 rounded-lg font-medium text-sm transition-colors ${activeTab === 'triage' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
                     >
@@ -158,8 +171,8 @@ export default function AdminDashboard() {
                     <div className="flex items-center">
                         <div className="relative">
                             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 placeholder="Search tracking #..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -271,7 +284,7 @@ export default function AdminDashboard() {
                                 ) : (
                                     <div className="divide-y divide-slate-100">
                                         {filtered.map(g => (
-                                            <button 
+                                            <button
                                                 key={g.id}
                                                 onClick={() => setSelectedId(g.id)}
                                                 className={`w-full text-left p-5 hover:bg-slate-50 transition-colors flex items-start ${selectedId === g.id ? 'bg-indigo-50/50 border-l-4 border-indigo-500' : 'border-l-4 border-transparent'}`}
@@ -285,7 +298,7 @@ export default function AdminDashboard() {
                                                     </div>
                                                     <h3 className="font-bold text-slate-900 text-sm truncate">{g.title}</h3>
                                                     <p className="text-xs text-slate-500 mt-1 truncate">{g.description}</p>
-                                                    
+
                                                     <div className="flex items-center mt-3 text-[10px] text-slate-400 font-medium space-x-3">
                                                         <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {new Date(g.created_at).toLocaleDateString()}</span>
                                                         <span>•</span>
@@ -322,7 +335,7 @@ export default function AdminDashboard() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="p-6 space-y-6">
                                                 <div>
                                                     <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Description</h4>
@@ -347,11 +360,11 @@ export default function AdminDashboard() {
                                                     <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-4 flex items-center">
                                                         <Shield className="w-4 h-4 mr-2" /> Administrative Actions
                                                     </h4>
-                                                    
+
                                                     {selectedGrievance.status === 'submitted' && (
                                                         <div className="space-y-3">
                                                             <p className="text-xs text-indigo-600 mb-3">This grievance is waiting for official acknowledgement.</p>
-                                                            <button 
+                                                            <button
                                                                 onClick={() => handleAcknowledge(selectedGrievance.id)}
                                                                 disabled={processing}
                                                                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors flex justify-center items-center"
@@ -361,27 +374,32 @@ export default function AdminDashboard() {
                                                         </div>
                                                     )}
 
-                                                    {(selectedGrievance.status === 'acknowledged' || selectedGrievance.status === 'under_review') && (
+                                                    {selectedGrievance.status === 'acknowledged' && (
                                                         <div className="space-y-3">
-                                                            <button 
+                                                            <button
+                                                                onClick={() => handleUpdateStatus(selectedGrievance.id, 'under_review', 'Moved to under review by admin.')}
+                                                                disabled={processing}
+                                                                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-lg transition-colors"
+                                                            >
+                                                                Move to Under Review
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    {selectedGrievance.status === 'under_review' && (
+                                                        <div className="space-y-3">
+                                                            <button
                                                                 onClick={() => handleUpdateStatus(selectedGrievance.id, 'in_progress', 'Started fieldwork and repairs.')}
                                                                 disabled={processing}
                                                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-colors"
                                                             >
                                                                 Mark In Progress
                                                             </button>
-                                                            <button 
-                                                                onClick={() => handleResolve(selectedGrievance.id)}
-                                                                disabled={processing}
-                                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg transition-colors"
-                                                            >
-                                                                Resolve Issue
-                                                            </button>
                                                         </div>
                                                     )}
 
                                                     {selectedGrievance.status === 'in_progress' && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleResolve(selectedGrievance.id)}
                                                             disabled={processing}
                                                             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg transition-colors"

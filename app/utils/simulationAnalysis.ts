@@ -40,8 +40,11 @@ export function computeCoverageImprovements(
     const bHealth = coveragePercent(before, 'hospital', COVERAGE_THRESHOLDS.healthcare);
     const aHealth = coveragePercent(after, 'hospital', COVERAGE_THRESHOLDS.healthcare);
 
-    const bEmerg = coveragePercent(before, 'police_station', COVERAGE_THRESHOLDS.emergency);
-    const aEmerg = coveragePercent(after, 'police_station', COVERAGE_THRESHOLDS.emergency);
+    const bPolice = coveragePercent(before, 'police_station', COVERAGE_THRESHOLDS.emergency);
+    const aPolice = coveragePercent(after, 'police_station', COVERAGE_THRESHOLDS.emergency);
+
+    const bFire = coveragePercent(before, 'fire_station', COVERAGE_THRESHOLDS.emergency);
+    const aFire = coveragePercent(after, 'fire_station', COVERAGE_THRESHOLDS.emergency);
 
     const bTransit = coveragePercent(before, 'bus_stop', COVERAGE_THRESHOLDS.transit);
     const aTransit = coveragePercent(after, 'bus_stop', COVERAGE_THRESHOLDS.transit);
@@ -51,10 +54,56 @@ export function computeCoverageImprovements(
 
     return {
         healthcare: aHealth - bHealth,
-        emergency: aEmerg - bEmerg,
+        emergency: Math.max(aPolice - bPolice, aFire - bFire),
         transit: aTransit - bTransit,
         education: aEdu - bEdu,
     };
+}
+
+// ─── Service Distance Comparison ─────────────────────────────────────────────
+
+export interface ServiceDistanceComparison {
+    service: string;
+    label: string;
+    beforeAvg: number;
+    afterAvg: number;
+    delta: number;
+    threshold: number;
+    beforeCoveragePercent: number;
+    afterCoveragePercent: number;
+}
+
+export function computeServiceDistanceComparison(
+    before: GridCell[],
+    after: GridCell[]
+): ServiceDistanceComparison[] {
+    const services: { key: keyof GridCell['service_distances']; label: string; threshold: number }[] = [
+        { key: 'hospital', label: 'Healthcare', threshold: COVERAGE_THRESHOLDS.healthcare },
+        { key: 'school', label: 'Education', threshold: COVERAGE_THRESHOLDS.education },
+        { key: 'bus_stop', label: 'Transit', threshold: COVERAGE_THRESHOLDS.transit },
+        { key: 'police_station', label: 'Police', threshold: COVERAGE_THRESHOLDS.emergency },
+        { key: 'fire_station', label: 'Fire Services', threshold: COVERAGE_THRESHOLDS.emergency },
+    ];
+
+    return services.map(({ key, label, threshold }) => {
+        const beforeAvg = before.length > 0
+            ? before.reduce((s, c) => s + c.service_distances[key], 0) / before.length
+            : 0;
+        const afterAvg = after.length > 0
+            ? after.reduce((s, c) => s + c.service_distances[key], 0) / after.length
+            : 0;
+
+        return {
+            service: key,
+            label,
+            beforeAvg: Math.round(beforeAvg * 100) / 100,
+            afterAvg: Math.round(afterAvg * 100) / 100,
+            delta: Math.round((afterAvg - beforeAvg) * 100) / 100,
+            threshold,
+            beforeCoveragePercent: coveragePercent(before, key, threshold),
+            afterCoveragePercent: coveragePercent(after, key, threshold),
+        };
+    });
 }
 
 // ─── Vulnerability Reduction ─────────────────────────────────────────────────

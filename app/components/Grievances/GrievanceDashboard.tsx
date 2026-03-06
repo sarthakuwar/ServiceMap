@@ -47,6 +47,22 @@ export default function GrievanceDashboard({ onClose }: Props) {
         }
     };
 
+    useEffect(() => {
+        loadData();
+        // Poll every 15 seconds
+        const interval = setInterval(loadData, 15000);
+        // Listen for admin changes via BroadcastChannel
+        let bc: BroadcastChannel | null = null;
+        try {
+            bc = new BroadcastChannel('grievance_updates');
+            bc.onmessage = () => loadData();
+        } catch (e) { /* BroadcastChannel not supported */ }
+        return () => {
+            clearInterval(interval);
+            bc?.close();
+        };
+    }, []);
+
     const filtered = grievances.filter(g => {
         if (filterStatus !== 'all' && g.status !== filterStatus) return false;
         if (filterWard !== 'all' && g.location?.ward_name !== filterWard) return false;

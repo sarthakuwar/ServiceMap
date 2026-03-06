@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { Recommendation } from '../types';
+import { Recommendation, SimulationAnalysis, AffectedWard } from '../types';
+import { computeServiceDistanceComparison } from './simulationAnalysis';
 
 export async function generateWardReport(
     mapElementId: string,
@@ -85,4 +86,251 @@ export async function generateWardReport(
 
     // Download
     doc.save(`${wardName.replace(/\s+/g, '_')}_Accessibility_Report.pdf`);
+}
+
+
+// ─── Simulation PDF Export ──────────────────────────────────────────────────
+
+export function generateSimulationReport(
+    analysis: SimulationAnalysis,
+    facilityTypes: string[],
+    matchedGrievanceCount: number
+) {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - 2 * margin;
+    let yPos = margin;
+
+    const addPageIfNeeded = (requiredSpace: number) => {
+        if (yPos + requiredSpace > doc.internal.pageSize.getHeight() - 20) {
+            doc.addPage();
+            yPos = margin;
+        }
+    };
+
+    // ── Header ──
+    doc.setFontSize(22);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Infrastructure Simulation Report', margin, yPos);
+    yPos += 8;
+
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Generated: ${new Date().toLocaleString()} • ServiceMap Planning Tool`, margin, yPos);
+    yPos += 4;
+
+    // Separator line
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 10;
+
+    // ── Executive Summary ──
+    doc.setFontSize(14);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Executive Summary', margin, yPos);
+    yPos += 8;
+
+    const facilityLabels: Record<string, string> = {
+        hospital: 'Hospital', school: 'School', bus_stop: 'Transit Hub',
+        police_station: 'Police Station', fire_station: 'Fire Station',
+    };
+
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+    const placementStr = facilityTypes.map(t => facilityLabels[t] || t).join(', ');
+    doc.text(`Facility Placements: ${placementStr}`, margin, yPos);
+    yPos += 6;
+
+    const popStr = analysis.populationAffected >= 1000
+        ? `${(analysis.populationAffected / 1000).toFixed(1)}k`
+        : `${analysis.populationAffected}`;
+    doc.text(`Population Affected: ${popStr} residents`, margin, yPos);
+    yPos += 6;
+    doc.text(`Zones Improved: ${analysis.zonesImproved}`, margin, yPos);
+    yPos += 6;
+    doc.text(`Average Score Increase: +${analysis.avgScoreIncrease.toFixed(1)} points`, margin, yPos);
+    yPos += 6;
+    doc.text(`Overall Impact Score: ${analysis.impactScore}/100`, margin, yPos);
+    yPos += 6;
+    if (matchedGrievanceCount > 0) {
+        doc.text(`Citizen Complaints Addressed: ${matchedGrievanceCount}`, margin, yPos);
+        yPos += 6;
+    }
+    yPos += 6;
+
+    // ── Before vs After Comparison Table ──
+    addPageIfNeeded(60);
+    doc.setFontSize(14);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Before vs After Comparison', margin, yPos);
+    yPos += 8;
+
+    const beforeAvg = analysis.beforeCells.length > 0
+        ? Math.round(analysis.beforeCells.reduce((s, c) => s + c.accessibility_score, 0) / analysis.beforeCells.length)
+        : 0;
+    const afterAvg = analysis.afterCells.length > 0
+        ? Math.round(analysis.afterCells.reduce((s, c) => s + c.accessibility_score, 0) / analysis.afterCells.length)
+        : 0;
+
+    // Table header
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Metric', margin, yPos);
+    doc.text('Before', margin + contentWidth * 0.45, yPos);
+    doc.text('After', margin + contentWidth * 0.65, yPos);
+    doc.text('Change', margin + contentWidth * 0.85, yPos);
+    yPos += 2;
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 5;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 65, 85);
+
+    const tableRows = [
+        { label: 'Avg Accessibility Score', before: `${beforeAvg}/100`, after: `${afterAvg}/100`, change: `+${afterAvg - beforeAvg}` },
+        { label: 'Vulnerability Index', before: `${analysis.vulnerabilityReduction.before}`, after: `${analysis.vulnerabilityReduction.after}`, change: `${analysis.vulnerabilityReduction.after - analysis.vulnerabilityReduction.before}` },
+        { label: 'Zones Improved', before: '0', after: `${analysis.zonesImproved}`, change: `+${analysis.zonesImproved}` },
+        { label: 'Population Served', before: '0', after: popStr, change: `+${popStr}` },
+    ];
+
+    tableRows.forEach(row => {
+        doc.text(row.label, margin, yPos);
+        doc.text(row.before, margin + contentWidth * 0.45, yPos);
+        doc.text(row.after, margin + contentWidth * 0.65, yPos);
+        doc.text(row.change, margin + contentWidth * 0.85, yPos);
+        yPos += 6;
+    });
+    yPos += 6;
+
+    // ── Service Distance Breakdown ──
+    addPageIfNeeded(60);
+    doc.setFontSize(14);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Service Distance Breakdown', margin, yPos);
+    yPos += 8;
+
+    const serviceComparison = computeServiceDistanceComparison(analysis.beforeCells, analysis.afterCells);
+
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Service', margin, yPos);
+    doc.text('Before (km)', margin + contentWidth * 0.35, yPos);
+    doc.text('After (km)', margin + contentWidth * 0.55, yPos);
+    doc.text('Change', margin + contentWidth * 0.72, yPos);
+    doc.text('Coverage', margin + contentWidth * 0.87, yPos);
+    yPos += 2;
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 5;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 65, 85);
+
+    serviceComparison.forEach(svc => {
+        doc.text(svc.label, margin, yPos);
+        doc.text(`${svc.beforeAvg}`, margin + contentWidth * 0.35, yPos);
+        doc.text(`${svc.afterAvg}`, margin + contentWidth * 0.55, yPos);
+        const changeStr = svc.delta !== 0 ? `${svc.delta > 0 ? '+' : ''}${svc.delta}` : '—';
+        doc.text(changeStr, margin + contentWidth * 0.72, yPos);
+        doc.text(`${svc.afterCoveragePercent}%`, margin + contentWidth * 0.87, yPos);
+        yPos += 6;
+    });
+    yPos += 6;
+
+    // ── Coverage Improvements ──
+    addPageIfNeeded(40);
+    doc.setFontSize(14);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Coverage Improvements', margin, yPos);
+    yPos += 8;
+
+    doc.setFontSize(10);
+    doc.setTextColor(51, 65, 85);
+    const ci = analysis.coverageImprovements;
+    doc.text(`Healthcare: ${ci.healthcare > 0 ? '+' : ''}${ci.healthcare}%`, margin, yPos);
+    yPos += 6;
+    doc.text(`Emergency: ${ci.emergency > 0 ? '+' : ''}${ci.emergency}%`, margin, yPos);
+    yPos += 6;
+    doc.text(`Transit: ${ci.transit > 0 ? '+' : ''}${ci.transit}%`, margin, yPos);
+    yPos += 6;
+    doc.text(`Education: ${ci.education > 0 ? '+' : ''}${ci.education}%`, margin, yPos);
+    yPos += 10;
+
+    // ── Affected Wards ──
+    if (analysis.affectedWards.length > 0) {
+        addPageIfNeeded(40);
+        doc.setFontSize(14);
+        doc.setTextColor(30, 41, 59);
+        doc.text(`Affected Wards (${analysis.affectedWards.length})`, margin, yPos);
+        yPos += 8;
+
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Ward', margin, yPos);
+        doc.text('Before', margin + contentWidth * 0.4, yPos);
+        doc.text('After', margin + contentWidth * 0.55, yPos);
+        doc.text('Change', margin + contentWidth * 0.7, yPos);
+        doc.text('Population', margin + contentWidth * 0.85, yPos);
+        yPos += 2;
+        doc.line(margin, yPos, pageWidth - margin, yPos);
+        yPos += 5;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(51, 65, 85);
+
+        analysis.affectedWards.slice(0, 15).forEach((w: AffectedWard) => {
+            addPageIfNeeded(8);
+            doc.text(w.wardName, margin, yPos);
+            doc.text(`${w.accessibilityBefore}`, margin + contentWidth * 0.4, yPos);
+            doc.text(`${w.accessibilityAfter}`, margin + contentWidth * 0.55, yPos);
+            doc.text(`+${w.accessibilityDelta}`, margin + contentWidth * 0.7, yPos);
+            const wPop = w.populationAffected >= 1000
+                ? `${(w.populationAffected / 1000).toFixed(1)}k`
+                : `${w.populationAffected}`;
+            doc.text(wPop, margin + contentWidth * 0.85, yPos);
+            yPos += 6;
+        });
+        yPos += 6;
+    }
+
+    // ── Planning Recommendation ──
+    addPageIfNeeded(30);
+    doc.setFontSize(14);
+    doc.setTextColor(16, 185, 129); // emerald
+    doc.text('Planning Recommendation', margin, yPos);
+    yPos += 8;
+
+    doc.setFontSize(10);
+    doc.setTextColor(51, 65, 85);
+    const recLines = doc.splitTextToSize(analysis.recommendation, contentWidth);
+    doc.text(recLines, margin, yPos);
+    yPos += recLines.length * 5 + 6;
+
+    // ── Insight Narrative ──
+    addPageIfNeeded(20);
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+    const narrativeLines = doc.splitTextToSize(analysis.insightNarrative, contentWidth);
+    doc.text(narrativeLines, margin, yPos);
+
+    // ── Footer ──
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text(
+            `ServiceMap Infrastructure Planning Report • Page ${i} of ${pageCount} • ${new Date().toLocaleDateString()}`,
+            margin,
+            doc.internal.pageSize.getHeight() - 10
+        );
+    }
+
+    // Download
+    const dateStr = new Date().toISOString().split('T')[0];
+    doc.save(`Simulation_Report_${dateStr}.pdf`);
 }

@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { GridCell, Facility, Recommendation, WardHistory, Insight, SimulationAnalysis, Grievance, GovernmentUpdate } from './types';
 import { useSimulation } from './hooks/useSimulation';
 import { generateInsights } from './utils/insightEngine';
-import { generateWardReport } from './utils/reportGenerator';
+import { generateWardReport, generateSimulationReport } from './utils/reportGenerator';
 import { buildSimulationAnalysis } from './utils/simulationAnalysis';
 import { matchGrievancesToSimulation } from './utils/grievanceMatching';
 
@@ -55,7 +55,7 @@ export default function Home() {
   // Government Updates State
   const [showUpdatesPanel, setShowUpdatesPanel] = useState(false);
   const [updates, setUpdates] = useState<GovernmentUpdate[]>([]);
-  
+
   // Simulation Analysis (computed)
   const simulationAnalysis = useMemo<SimulationAnalysis | null>(() => {
     if (!impactSummary || impactSummary.zonesImproved === 0) return null;
@@ -111,12 +111,32 @@ export default function Home() {
     });
   }, []);
 
-  // Fetch pending grievance count
+  // Fetch pending grievance count + refresh mechanism
+  const refreshGrievances = async () => {
+    try {
+      const [gData, sData] = await Promise.all([
+        fetch(`${API_BASE}/api/grievances`).then(r => r.json()).catch(() => []),
+        fetch(`${API_BASE}/api/grievances/stats`).then(r => r.json()).catch(() => null),
+      ]);
+      if (Array.isArray(gData)) setGrievances(gData);
+      if (sData) setPendingGrievances(sData.pending_ack || 0);
+    } catch { /* ignore */ }
+  };
+
   useEffect(() => {
-    fetch(`${API_BASE}/api/grievances/stats`)
-      .then(r => r.json())
-      .then(s => setPendingGrievances(s.pending_ack || 0))
-      .catch(() => { });
+    refreshGrievances();
+    // Poll every 30 seconds
+    const interval = setInterval(refreshGrievances, 30000);
+    // Listen for admin tab changes
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('grievance_updates');
+      bc.onmessage = () => refreshGrievances();
+    } catch (e) { /* BroadcastChannel not supported */ }
+    return () => {
+      clearInterval(interval);
+      bc?.close();
+    };
   }, []);
 
   // Fetch government updates
@@ -124,8 +144,8 @@ export default function Home() {
     fetch(`${API_BASE}/api/updates`)
       .then(r => r.json())
       .then(data => {
-          if (Array.isArray(data)) setUpdates(data);
-          else if (data.updates) setUpdates(data.updates);
+        if (Array.isArray(data)) setUpdates(data);
+        else if (data.updates) setUpdates(data.updates);
       })
       .catch(() => { });
   }, []);
@@ -164,29 +184,29 @@ export default function Home() {
   const unreadUpdatesCount = updates.filter(u => !u.read).length;
 
   const handleToggleUpdates = () => {
-      setShowUpdatesPanel(!showUpdatesPanel);
-      if (!showUpdatesPanel) {
-          setUpdates(updates.map(u => ({ ...u, read: true })));
-      }
+    setShowUpdatesPanel(!showUpdatesPanel);
+    if (!showUpdatesPanel) {
+      setUpdates(updates.map(u => ({ ...u, read: true })));
+    }
   };
 
   const handleSendUpdate = async (updateData: any) => {
-      const res = await fetch(`${API_BASE}/api/updates`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...updateData, officer_name: 'System Admin' })
-      });
-      const result = await res.json();
-      
-      fetch(`${API_BASE}/api/updates`)
-        .then(r => r.json())
-        .then(data => {
-            if (Array.isArray(data)) setUpdates(data.map(u => ({ ...u, read: true })));
-            else if (data.updates) setUpdates(data.updates.map((u: any) => ({ ...u, read: true })));
-        })
-        .catch(() => { });
-        
-      return result;
+    const res = await fetch(`${API_BASE}/api/updates`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...updateData, officer_name: 'System Admin' })
+    });
+    const result = await res.json();
+
+    fetch(`${API_BASE}/api/updates`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setUpdates(data.map(u => ({ ...u, read: true })));
+        else if (data.updates) setUpdates(data.updates.map((u: any) => ({ ...u, read: true })));
+      })
+      .catch(() => { });
+
+    return result;
   };
 
   if (loading) {
@@ -288,6 +308,16 @@ export default function Home() {
             analysis={simulationAnalysis}
             facilityTypes={placedFacilities.map(f => f.type)}
             onClose={() => setShowAnalysisPanel(false)}
+            onExportPDF={() => {
+              generateSimulationReport(
+                simulationAnalysis,
+                placedFacilities.map(f => f.type),
+                grievances.filter(g =>
+                  matchGrievancesToSimulation([g], placedFacilities.map(f => f.type),
+                    simulationAnalysis.affectedWards.map(w => w.wardName)).length > 0
+                ).length
+              );
+            }}
             matchedGrievances={grievances.filter(g =>
               matchGrievancesToSimulation([g], placedFacilities.map(f => f.type),
                 simulationAnalysis.affectedWards.map(w => w.wardName)).length > 0
@@ -316,12 +346,12 @@ export default function Home() {
 
         {/* Government Updates Panel */}
         {showUpdatesPanel && (
-            <UpdatesPanel 
-                updates={updates}
-                availableWards={Array.from(new Set(gridCells.map(c => c.ward_name)))}
-                onClose={() => setShowUpdatesPanel(false)}
-                onSendUpdate={handleSendUpdate}
-            />
+          <UpdatesPanel
+            updates={updates}
+            availableWards={Array.from(new Set(gridCells.map(c => c.ward_name)))}
+            onClose={() => setShowUpdatesPanel(false)}
+            onSendUpdate={handleSendUpdate}
+          />
         )}
 
         {/* Report Export View */}

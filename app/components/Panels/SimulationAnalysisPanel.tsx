@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { SimulationAnalysis, AffectedWard, Grievance } from '@/app/types';
-import { X, ChevronDown, ChevronUp, Download, TrendingUp, Shield, Users, MapPin, Target, AlertTriangle, Lightbulb, FileText } from 'lucide-react';
+import { computeServiceDistanceComparison, ServiceDistanceComparison } from '@/app/utils/simulationAnalysis';
+import { X, ChevronDown, ChevronUp, Download, TrendingUp, Shield, Users, MapPin, Target, AlertTriangle, Lightbulb, FileText, ArrowRight, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SimulationAnalysisPanelProps {
@@ -91,6 +92,20 @@ export default function SimulationAnalysisPanel({
     const afterAvg = analysis.afterCells.length > 0
         ? Math.round(analysis.afterCells.reduce((s, c) => s + c.accessibility_score, 0) / analysis.afterCells.length) : 0;
 
+    // Compute per-service distance comparison
+    const serviceComparison = computeServiceDistanceComparison(analysis.beforeCells, analysis.afterCells);
+
+    // Compute gap closure (how much of the gap to ideal score=80 does this close?)
+    const idealScore = 80;
+    const currentGap = Math.max(0, idealScore - beforeAvg);
+    const gapClosed = currentGap > 0 ? Math.round(((afterAvg - beforeAvg) / currentGap) * 100) : 0;
+
+    // Actual state metrics
+    const actualDeserts = analysis.beforeCells.filter(c => c.accessibility_score < 40 && c.population_estimate > 10000).length;
+    const simDeserts = analysis.afterCells.filter(c => c.accessibility_score < 40 && c.population_estimate > 10000).length;
+    const actualUnderservedPop = analysis.beforeCells.filter(c => c.accessibility_score < 40).reduce((s, c) => s + c.population_estimate, 0);
+    const simUnderservedPop = analysis.afterCells.filter(c => c.accessibility_score < 40).reduce((s, c) => s + c.population_estimate, 0);
+
     return (
         <div className="fixed inset-0 z-[3500] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -153,33 +168,83 @@ export default function SimulationAnalysisPanel({
                             </div>
                         </div>
 
-                        {/* ── Before vs After (collapsed) ── */}
-                        <CollapsibleSection title="Before vs After Comparison"
-                            icon={<TrendingUp className="w-4 h-4 text-blue-500" />} defaultOpen={false}>
-                            <div className="grid grid-cols-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                                <span>Metric</span><span>Before</span><span>After</span>
-                            </div>
-                            {[
-                                { label: 'Avg Accessibility', before: beforeAvg, after: afterAvg, unit: '/100' },
-                                { label: 'Vulnerability Index', before: vulnerabilityReduction.before, after: vulnerabilityReduction.after, unit: '', invert: true },
-                                { label: 'Zones Improved', before: 0, after: zonesImproved, unit: '' },
-                                { label: 'Population Served', before: 0, after: populationAffected, unit: '', fmt: true },
-                            ].map((row, i) => {
-                                const delta = row.after - row.before;
-                                const isGood = row.invert ? delta < 0 : delta > 0;
-                                return (
-                                    <div key={i} className={`grid grid-cols-3 text-center py-2.5 ${i % 2 === 0 ? 'bg-slate-50/50' : ''} rounded-lg`}>
-                                        <span className="text-xs font-semibold text-slate-600 text-left pl-2">{row.label}</span>
-                                        <span className="text-sm font-bold text-slate-400">
-                                            {row.fmt && row.before >= 1000 ? `${(row.before / 1000).toFixed(1)}k` : row.before}{row.unit}
-                                        </span>
-                                        <span className={`text-sm font-bold ${isGood ? 'text-emerald-600' : delta === 0 ? 'text-slate-400' : 'text-red-500'}`}>
-                                            {row.fmt && row.after >= 1000 ? `${(row.after / 1000).toFixed(1)}k` : row.after}{row.unit}
-                                            {delta !== 0 && <span className="text-[10px] ml-1">({isGood ? '↑' : '↓'})</span>}
-                                        </span>
+                        {/* ── Current Reality vs Simulation Plan ── */}
+                        <CollapsibleSection title="Current Reality vs Simulation Plan"
+                            icon={<BarChart3 className="w-4 h-4 text-purple-500" />} defaultOpen={true}>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                    <span>Metric</span><span>Current</span><span>Simulated</span>
+                                </div>
+                                {[
+                                    { label: 'Avg Score', before: beforeAvg, after: afterAvg, unit: '/100' },
+                                    { label: 'Service Deserts', before: actualDeserts, after: simDeserts, unit: ' zones', invert: true },
+                                    { label: 'Underserved Pop', before: actualUnderservedPop, after: simUnderservedPop, unit: '', fmt: true, invert: true },
+                                    { label: 'Vulnerability', before: vulnerabilityReduction.before, after: vulnerabilityReduction.after, unit: '', invert: true },
+                                ].map((row, i) => {
+                                    const delta = row.after - row.before;
+                                    const isGood = row.invert ? delta < 0 : delta > 0;
+                                    return (
+                                        <div key={i} className={`grid grid-cols-3 text-center py-2.5 ${i % 2 === 0 ? 'bg-slate-50/50' : ''} rounded-lg`}>
+                                            <span className="text-xs font-semibold text-slate-600 text-left pl-2">{row.label}</span>
+                                            <span className="text-sm font-bold text-slate-400">
+                                                {row.fmt && row.before >= 1000 ? `${(row.before / 1000).toFixed(1)}k` : row.before}{row.unit}
+                                            </span>
+                                            <span className={`text-sm font-bold ${isGood ? 'text-emerald-600' : delta === 0 ? 'text-slate-400' : 'text-red-500'}`}>
+                                                {row.fmt && row.after >= 1000 ? `${(row.after / 1000).toFixed(1)}k` : row.after}{row.unit}
+                                                {delta !== 0 && <span className="text-[10px] ml-1">({isGood ? '↑' : '↓'})</span>}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Gap closure indicator */}
+                                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-lg p-3 mt-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-bold text-purple-700">Gap Closure to Ideal (Score ≥80)</span>
+                                        <span className="text-sm font-extrabold text-purple-600">{gapClosed}%</span>
                                     </div>
-                                );
-                            })}
+                                    <div className="h-2 bg-purple-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full transition-all duration-700"
+                                            style={{ width: `${Math.min(100, gapClosed)}%` }} />
+                                    </div>
+                                    <p className="text-[10px] text-purple-500 mt-1.5">
+                                        This placement closes {gapClosed}% of the gap between current avg ({beforeAvg}) and ideal ({idealScore}).
+                                    </p>
+                                </div>
+                            </div>
+                        </CollapsibleSection>
+
+                        {/* ── Per-Service Distance Comparison ── */}
+                        <CollapsibleSection title="Service Distance Breakdown"
+                            icon={<TrendingUp className="w-4 h-4 text-blue-500" />} defaultOpen={false}>
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                    <span className="text-left">Service</span>
+                                    <span>Before</span>
+                                    <span>After</span>
+                                    <span>Δ</span>
+                                    <span>Coverage</span>
+                                </div>
+                                {serviceComparison.map((svc, i) => {
+                                    const improved = svc.delta < 0;
+                                    const coverageDelta = svc.afterCoveragePercent - svc.beforeCoveragePercent;
+                                    return (
+                                        <div key={svc.service} className={`grid grid-cols-5 text-center items-center py-2 ${i % 2 === 0 ? 'bg-slate-50/50' : ''} rounded-lg`}>
+                                            <span className="text-xs font-semibold text-slate-600 text-left pl-2">{svc.label}</span>
+                                            <span className="text-xs text-slate-400">{svc.beforeAvg}km</span>
+                                            <span className={`text-xs font-bold ${improved ? 'text-emerald-600' : 'text-slate-500'}`}>{svc.afterAvg}km</span>
+                                            <span className={`text-xs font-bold ${improved ? 'text-emerald-600' : svc.delta === 0 ? 'text-slate-300' : 'text-red-500'}`}>
+                                                {svc.delta !== 0 ? (svc.delta > 0 ? '+' : '') + svc.delta + 'km' : '—'}
+                                            </span>
+                                            <span className={`text-xs font-bold ${coverageDelta > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                                {svc.afterCoveragePercent}%
+                                                {coverageDelta > 0 && <span className="text-[9px]"> (+{coverageDelta})</span>}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-3">Coverage = % population within threshold (Hospital 3km, School 2km, Transit 1.5km, Emergency 4km)</p>
                         </CollapsibleSection>
 
                         {/* ── Coverage Improvements (collapsed) ── */}
@@ -191,7 +256,7 @@ export default function SimulationAnalysisPanel({
                                 <CoverageBar label="🚌 Transit" value={coverageImprovements.transit} color="#f59e0b" />
                                 <CoverageBar label="🏫 Education" value={coverageImprovements.education} color="#3b82f6" />
                             </div>
-                            <p className="text-[10px] text-slate-400 mt-3">% change in population within threshold distances (Hospital 3km, Police 4km, Transit 1.5km, School 2km)</p>
+                            <p className="text-[10px] text-slate-400 mt-3">% change in population within threshold distances (Hospital 3km, Police/Fire 4km, Transit 1.5km, School 2km)</p>
                         </CollapsibleSection>
 
                         {/* ── Affected Wards (collapsed) ── */}
