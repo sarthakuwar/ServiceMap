@@ -5,8 +5,6 @@ import { GridCell, ContactEntry } from '@/app/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, Users, Activity, Download, MessageSquare, Send, Phone, MapPin, Clock, AlertTriangle, Shield, Sparkles } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
-import InsightsPanel from '../Panels/InsightsPanel';
 import { generateVulnerabilityPlan } from '@/app/utils/geminiApi';
 
 interface RightPanelProps {
@@ -14,6 +12,7 @@ interface RightPanelProps {
     onClose: () => void;
     onGenerateReport: () => void;
     onViewDetail?: () => void;
+    vulnerabilityMode?: boolean;
 }
 
 const SERVICE_ICONS: Record<string, string> = {
@@ -27,7 +26,7 @@ const SERVICE_LABELS: Record<string, string> = {
     fire_station: 'Fire Stations',
 };
 
-export default function RightPanel({ cell, onClose, onGenerateReport, onViewDetail }: RightPanelProps) {
+export default function RightPanel({ cell, onClose, onGenerateReport, onViewDetail, vulnerabilityMode = false }: RightPanelProps) {
     const [activeTab, setActiveTab] = useState<'overview' | 'contacts'>('overview');
     const [newComment, setNewComment] = useState('');
     const [localComments, setLocalComments] = useState<string[]>([]);
@@ -127,10 +126,7 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
                             </p>
                         </div>
 
-                        {/* AI Insights specific to this ward */}
-                        <div className="my-6">
-                            <InsightsPanel insights={[]} cells={[cell]} />
-                        </div>
+
 
                         {/* Vulnerability Index */}
                         {cell.vulnerability_index !== undefined && (
@@ -378,7 +374,7 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
             <div className="p-6 border-t border-slate-100 bg-white space-y-3">
                 {onViewDetail && (
                     <Button onClick={onViewDetail} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-6 rounded-xl shadow-lg transition-colors">
-                        View Full Details →
+                        {vulnerabilityMode ? 'View Full Vulnerability Analysis →' : 'View Full Details →'}
                     </Button>
                 )}
                 <Button onClick={onGenerateReport} variant="outline" className="w-full border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold py-5 rounded-xl">

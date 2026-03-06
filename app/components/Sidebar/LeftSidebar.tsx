@@ -4,8 +4,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { GridCell } from '@/app/types';
 
 interface LeftSidebarProps {
-    activeView: 'map' | 'sim' | 'rank' | 'report' | 'grievances';
-    setActiveView: (v: 'map' | 'sim' | 'rank' | 'report' | 'grievances') => void;
+    activeView: 'map' | 'sim' | 'report' | 'grievances';
+    setActiveView: (v: 'map' | 'sim' | 'report' | 'grievances') => void;
     avgScore?: number;
     impactSummary?: { populationAffected: number; zonesImproved: number; avgScoreIncrease: number } | null;
     vulnerabilityMode?: boolean;
@@ -97,14 +97,6 @@ export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, i
                         onClick={() => setActiveView('sim')}
                     >
                         <Activity className="mr-3 w-4 h-4" /> Simulations
-                    </Button>
-
-                    <Button
-                        variant={activeView === 'rank' ? 'secondary' : 'ghost'}
-                        className={`w-full justify-start rounded-lg ${activeView === 'rank' ? 'bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
-                        onClick={() => setActiveView('rank')}
-                    >
-                        <BarChart3 className="mr-3 w-4 h-4" /> Leaderboard
                     </Button>
 
                     <Button

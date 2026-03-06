@@ -1,0 +1,88 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.STATUS_COLORS = exports.STATUS_LABELS = exports.DEPARTMENT_LABELS = exports.CATEGORY_TO_DEPARTMENT = exports.CATEGORY_ICONS = exports.CATEGORY_LABELS = void 0;
+exports.CATEGORY_LABELS = {
+    road_pothole: 'Road & Potholes',
+    water_supply: 'Water Supply',
+    sewage_drainage: 'Sewage & Drainage',
+    streetlight: 'Street Lights',
+    garbage: 'Garbage Collection',
+    public_toilet: 'Public Toilets',
+    encroachment: 'Encroachment',
+    noise_pollution: 'Noise Pollution',
+    tree_hazard: 'Tree Hazard',
+    public_transport: 'Bus Stop / Transit',
+    healthcare_access: 'Healthcare Access',
+    school_infra: 'School Infrastructure',
+    park_maintenance: 'Parks & Playgrounds',
+    other: 'Other Civic Issue',
+};
+exports.CATEGORY_ICONS = {
+    road_pothole: '🕳️',
+    water_supply: '💧',
+    sewage_drainage: '🚰',
+    streetlight: '💡',
+    garbage: '🗑️',
+    public_toilet: '🚻',
+    encroachment: '🚧',
+    noise_pollution: '🔊',
+    tree_hazard: '🌳',
+    public_transport: '🚌',
+    healthcare_access: '🏥',
+    school_infra: '🏫',
+    park_maintenance: '🌳',
+    other: '📋',
+};
+exports.CATEGORY_TO_DEPARTMENT = {
+    road_pothole: 'BBMP_Engineering',
+    water_supply: 'BWSSB',
+    sewage_drainage: 'BWSSB',
+    streetlight: 'BESCOM',
+    garbage: 'SWM',
+    public_toilet: 'Health_Dept',
+    encroachment: 'Revenue',
+    noise_pollution: 'Traffic_Police',
+    tree_hazard: 'Horticulture',
+    public_transport: 'BMTC',
+    healthcare_access: 'Health_Dept',
+    school_infra: 'Education_Dept',
+    park_maintenance: 'Horticulture',
+    other: 'General_BBMP',
+};
+exports.DEPARTMENT_LABELS = {
+    BBMP_Engineering: 'BBMP Engineering',
+    BWSSB: 'BWSSB (Water & Sewerage)',
+    BESCOM: 'BESCOM (Electricity)',
+    SWM: 'Solid Waste Management',
+    BMTC: 'BMTC (Transport)',
+    Health_Dept: 'Public Health Dept',
+    Education_Dept: 'Education Dept',
+    Horticulture: 'Horticulture Dept',
+    Revenue: 'Revenue Dept',
+    Traffic_Police: 'Traffic Police',
+    Town_Planning: 'BBMP Town Planning',
+    General_BBMP: 'General BBMP',
+};
+exports.STATUS_LABELS = {
+    submitted: 'Submitted',
+    acknowledged: 'Acknowledged',
+    under_review: 'Under Review',
+    in_progress: 'In Progress',
+    resolved: 'Resolved',
+    citizen_confirmed: 'Citizen Confirmed',
+    reopened: 'Reopened',
+    escalated: 'Escalated',
+    closed: 'Closed',
+};
+exports.STATUS_COLORS = {
+    submitted: '#f59e0b',
+    acknowledged: '#3b82f6',
+    under_review: '#8b5cf6',
+    in_progress: '#f97316',
+    resolved: '#10b981',
+    citizen_confirmed: '#059669',
+    reopened: '#ef4444',
+    escalated: '#dc2626',
+    closed: '#64748b',
+};
+// ─── Government Updates ─────────────────────────────────────────────────────

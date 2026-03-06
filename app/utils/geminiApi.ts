@@ -1,11 +1,9 @@
 import { GridCell, Facility, Recommendation } from "../types";
 
-const GEMINI_API_KEY = "AIzaSyDzEy7zyVwxsiAXNLHPs9NyMIgR2LR3w_U";
+const GEMINI_API_KEY = "AIzaSyDyNjarrsvlstJk0BVUOygENccE574112I";
 
 const GEMINI_MODELS = [
   "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-lite",
 ];
 
 function getGeminiUrl(model: string) {
@@ -137,6 +135,42 @@ ${(() => {
   return context;
 }
 
+function buildSingleWardContext(cell: GridCell): string {
+  const vulnScore = cell.vulnerability_index || 0;
+  const accessScore = cell.accessibility_score;
+  const pop = (cell.population_estimate / 1000).toFixed(1);
+  const { hospital, school, bus_stop, police_station, fire_station } = cell.service_distances;
+
+  const gaps: string[] = [];
+  if (hospital > 4) gaps.push("Critical: Hospital > 4km");
+  else if (hospital > 2) gaps.push("Moderate: Hospital > 2km");
+
+  if (school > 3) gaps.push("Critical: School > 3km");
+  else if (school > 1.5) gaps.push("Moderate: School > 1.5km");
+
+  if (bus_stop > 2) gaps.push("Critical: Transit > 2km");
+  else if (bus_stop > 0.8) gaps.push("Moderate: Transit > 0.8km");
+
+  if (police_station > 5) gaps.push("Critical: Police > 5km");
+  if (fire_station > 5) gaps.push("Critical: Fire Station > 5km");
+
+  return `WARD CONTEXT:
+Ward Name: ${cell.ward_name}
+Population: ${pop}k
+Vulnerability Index: ${vulnScore}/100 (Higher is worse)
+Accessibility Score: ${accessScore}/100 (Higher is better)
+
+LOCAL SERVICE DISTANCES (km):
+- Hospital: ${hospital.toFixed(2)}
+- School: ${school.toFixed(2)}
+- Transit (Bus): ${bus_stop.toFixed(2)}
+- Police Station: ${police_station.toFixed(2)}
+- Fire Station: ${fire_station.toFixed(2)}
+
+SERVICE GAPS IDENTIFIED:
+${gaps.length > 0 ? gaps.map(g => `- ${g}`).join('\n') : "None detected based on thresholds."}`;
+}
+
 export async function chatWithGemini(
   query: string,
   cells: GridCell[],
@@ -206,56 +240,20 @@ export async function chatWithGemini(
   }
 }
 
-export async function generateAIInsights(
-  cells: GridCell[],
-  recommendations?: Recommendation[],
-): Promise<string> {
-  const context = buildPlatformContext(cells, undefined, recommendations);
-
+export async function generateVulnerabilityPlan(cell: GridCell): Promise<string> {
+  const context = buildSingleWardContext(cell);
   const prompt = `${context}
 
-Based on the above single-ward data, generate exactly 3 actionable infrastructure insights tailored specifically for this ward as a JSON array. Each insight should have:
-- "id": unique string like "ai_insight_1"
-- "title": short punchy title (3-5 words)
-- "description": one sentence with specific data points
-- "type": one of "negative", "positive"
-- "ward_name": the relevant ward name (must be included)
-- "priority": number 1-3 (1=most urgent)
+INSTRUCTIONS:
+You are an austere urban planning system. Based strictly on the data provided above, output a 3-step mitigation action plan designed to reduce vulnerability.
 
-Prioritize: critical gaps first, then disparities, then positive highlights.
-Return ONLY the JSON array, no markdown formatting or code blocks.`;
-
-  try {
-    const data = await callGeminiWithFallback({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 800,
-        topP: 0.8,
-      },
-    });
-
-    if (!data) {
-      console.warn("All Gemini models exhausted for insights");
-      return "";
-    }
-
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  } catch (err) {
-    console.error("Gemini insights error:", err);
-    return "";
-  }
-}
-
-export async function generateVulnerabilityPlan(cell: GridCell): Promise<string> {
-  const prompt = `You are an urban planner assistant analyzing Bangalore's infrastructure.
-Analyze Ward: ${cell.ward_name} (Population: ${(cell.population_estimate / 1000).toFixed(1)}k).
-Vulnerability Index: ${cell.vulnerability_index || 0}/100.
-Accessibility Score: ${cell.accessibility_score}/100.
-Local Service Distances (km): Hospital ${cell.service_distances.hospital.toFixed(2)}, School ${cell.service_distances.school.toFixed(2)}, Transit ${cell.service_distances.bus_stop.toFixed(2)}, Police ${cell.service_distances.police_station.toFixed(2)}, Fire ${cell.service_distances.fire_station.toFixed(2)}.
-
-Based on the high vulnerability, identify the top contributing factors (e.g. high population with poor critical service access) and provide a concrete, 3-step mitigation action plan designed for local policymakers.
-Keep it strictly to 3 short paragraphs or bullet points. No conversational filler. Use bold text for emphasis formatting.`;
+Rules for Determinism:
+1. Output format MUST be exactly three numbered points.
+2. Step 1 MUST address the nearest critical service gap, or if none, the lowest performing accessibility metric.
+3. Step 2 MUST address population density management or transit connectivity.
+4. Step 3 MUST be a specific, measurable administrative or policy action based on the data.
+5. Use bold text for metric emphasis.
+6. DO NOT include any introductory or concluding sentences. DO NOT say "Here is the plan:". Return ONLY the numbered list.`;
 
   try {
     const data = await callGeminiWithFallback({

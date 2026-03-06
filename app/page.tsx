@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { GridCell, Facility, Recommendation, WardHistory, Insight, SimulationAnalysis, Grievance, GovernmentUpdate } from './types';
+import { GridCell, Facility, Recommendation, WardHistory, SimulationAnalysis, Grievance, GovernmentUpdate } from './types';
 import { useSimulation } from './hooks/useSimulation';
-import { generateInsights } from './utils/insightEngine';
 import { generateWardReport, generateSimulationReport } from './utils/reportGenerator';
 import { buildSimulationAnalysis } from './utils/simulationAnalysis';
 import { matchGrievancesToSimulation } from './utils/grievanceMatching';
@@ -14,7 +13,6 @@ import LeftSidebar from './components/Sidebar/LeftSidebar';
 import RightPanel from './components/Sidebar/RightPanel';
 import StatsBar from './components/UI/StatsBar';
 import SimulationToolbar from './components/Panels/SimulationToolbar';
-import LeaderboardPanel from './components/Panels/LeaderboardPanel';
 import GovernancePanel from './components/Panels/GovernancePanel';
 import AIChatbot from './components/UI/AIChatbot';
 import GrievanceDashboard from './components/Grievances/GrievanceDashboard';
@@ -28,7 +26,7 @@ const WardDetailPage = dynamic(() => import('./components/Panels/WardDetailPage'
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<'map' | 'sim' | 'rank' | 'report' | 'grievances'>('map');
+  const [activeView, setActiveView] = useState<'map' | 'sim' | 'report' | 'grievances'>('map');
   const [vulnerabilityMode, setVulnerabilityMode] = useState(false);
 
   // Data State
@@ -36,7 +34,6 @@ export default function Home() {
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [wardHistory, setWardHistory] = useState<WardHistory[]>([]);
-  const [insights, setInsights] = useState<Insight[]>([]);
 
   // Simulation State
   const [activeSimType, setActiveSimType] = useState<string | null>(null);
@@ -86,7 +83,6 @@ export default function Home() {
       setRecommendations(recData);
       setWardHistory(historyData);
       setGrievances(grievanceData);
-      setInsights(generateInsights(cellsData));
       setLoading(false);
     }).catch(() => {
       console.warn('FastAPI backend unavailable, falling back to static JSON');
@@ -102,7 +98,6 @@ export default function Home() {
         setRecommendations(recData);
         setWardHistory(historyData);
         setGrievances(grievanceData);
-        setInsights(generateInsights(cellsData));
         setLoading(false);
       }).catch(err => {
         console.error('Error loading data:', err);
@@ -150,13 +145,7 @@ export default function Home() {
       .catch(() => { });
   }, []);
 
-  useEffect(() => {
-    if (isSimulating && simulatedCells.length > 0) {
-      setInsights(generateInsights(simulatedCells));
-    } else if (!isSimulating && gridCells.length > 0) {
-      setInsights(generateInsights(gridCells));
-    }
-  }, [isSimulating, simulatedCells, gridCells]);
+  // Removed Insights generation logic
 
   useEffect(() => {
     if (activeView === 'sim') {
@@ -276,6 +265,7 @@ export default function Home() {
               onClose={() => setSelectedCellId(null)}
               onGenerateReport={handleGenerateReport}
               onViewDetail={() => setShowWardDetail(true)}
+              vulnerabilityMode={vulnerabilityMode}
             />
           </>
         )}
@@ -288,6 +278,7 @@ export default function Home() {
             wardHistory={wardHistory}
             onClose={() => setShowWardDetail(false)}
             onGenerateReport={handleGenerateReport}
+            vulnerabilityMode={vulnerabilityMode}
           />
         )}
 
@@ -325,17 +316,9 @@ export default function Home() {
           />
         )}
 
-        {/* Leaderboard Overlay */}
-        {activeView === 'rank' && (
-          <div className="absolute inset-0 z-[2000] bg-white/95 backdrop-blur-lg overflow-hidden flex">
-            <div className="w-1/2 h-full">
-              <LeaderboardPanel cells={gridCells} recommendations={recommendations} />
-            </div>
-            <div className="w-1/2 h-full border-l border-slate-200">
-              <GovernancePanel history={wardHistory} />
-            </div>
-          </div>
-        )}
+        {/* Removed Leaderboard Overlay */}
+
+        {/* Removed Insights Overlay */}
 
         {/* Grievance Dashboard Overlay */}
         {activeView === 'grievances' && (

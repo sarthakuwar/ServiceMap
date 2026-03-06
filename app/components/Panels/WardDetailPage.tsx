@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { GridCell, WardHistory, ContactEntry } from '@/app/types';
-import { X, Users, Activity, Download, Shield, TrendingUp, Phone, MapPin, Clock, AlertTriangle, Droplets, Trash2, ExternalLink, Info, Database, HelpCircle } from 'lucide-react';
+import { X, Users, Activity, Download, Shield, TrendingUp, Phone, MapPin, Clock, AlertTriangle, Droplets, Trash2, ExternalLink, Info, Database, HelpCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, LineChart, Line, CartesianGrid } from 'recharts';
 import { METRIC_DEFINITIONS } from '@/app/constants/metrics';
@@ -28,6 +28,7 @@ interface WardDetailPageProps {
     wardHistory: WardHistory[];
     onClose: () => void;
     onGenerateReport: () => void;
+    vulnerabilityMode?: boolean;
 }
 
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
@@ -49,11 +50,15 @@ const GAP_THRESHOLDS: Record<string, { critical: number; moderate: number }> = {
     fire_station: { critical: 5, moderate: 3 },
 };
 
-export default function WardDetailPage({ cell, allCells, wardHistory, onClose, onGenerateReport }: WardDetailPageProps) {
-    const [activeTab, setActiveTab] = useState<'overview' | 'services' | 'trends'>('overview');
+import { generateVulnerabilityPlan } from '@/app/utils/geminiApi';
+
+export default function WardDetailPage({ cell, allCells, wardHistory, onClose, onGenerateReport, vulnerabilityMode = false }: WardDetailPageProps) {
+    const [activeTab, setActiveTab] = useState<'overview' | 'services' | 'trends' | 'vulnerability'>(vulnerabilityMode ? 'vulnerability' : 'overview');
     const [contacts, setContacts] = useState<Record<string, ContactEntry[]> | null>(null);
     const [contactsLoading, setContactsLoading] = useState(false);
     const [showMethodology, setShowMethodology] = useState(false);
+    const [vulnAIPlan, setVulnAIPlan] = useState<string | null>(null);
+    const [isGeneratingVulnPlan, setIsGeneratingVulnPlan] = useState(false);
 
     const cityAvg = allCells.length > 0 ? Math.round(allCells.reduce((sum, c) => sum + c.accessibility_score, 0) / allCells.length) : 0;
     const wardCells = allCells.filter(c => c.ward_name === cell.ward_name);
@@ -71,7 +76,12 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
         }
     }, [activeTab, cell.cell_id, contacts]);
 
-
+    const handleGenerateVulnPlan = async () => {
+        setIsGeneratingVulnPlan(true);
+        const plan = await generateVulnerabilityPlan(cell);
+        setVulnAIPlan(plan);
+        setIsGeneratingVulnPlan(false);
+    };
 
     const getScoreColor = (s: number) => s >= 80 ? 'text-emerald-600' : s >= 60 ? 'text-yellow-600' : s >= 40 ? 'text-orange-500' : 'text-red-500';
     const getBarColor = (dist: number) => dist > 3 ? '#ef4444' : dist > 1.5 ? '#f59e0b' : '#10b981';
@@ -154,31 +164,31 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                         <p className="text-xs text-slate-400 mt-1">High Density Area</p>
                     </div>
                     <div className="bg-white border border-slate-200 rounded-xl p-5">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Civic Issues Resolved <MetricTooltip metricKey="civic_issues_resolved" /></div>
-                        <div className="text-3xl font-extrabold text-emerald-600">{Math.round(clamp(0.5 + cell.accessibility_score / 200, 0.4, 0.95) * 100)}%</div>
-                        <p className="text-xs text-slate-400 mt-1">Based on ward accessibility</p>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Vulnerability Index <MetricTooltip metricKey="vulnerability" /></div>
+                        <div className="text-3xl font-extrabold text-orange-600">{cell.vulnerability_index ?? 'N/A'}<span className="text-sm font-normal text-slate-300">/100</span></div>
+                        <p className="text-xs text-slate-400 mt-1">Socioeconomic need</p>
                     </div>
                     <div className="bg-white border border-slate-200 rounded-xl p-5">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Service Coverage <MetricTooltip metricKey="service_coverage" /></div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Fairness Score <MetricTooltip metricKey="fairness" /></div>
                         <div className="text-3xl font-extrabold text-blue-600">
-                            {cell.locality_rating}<span className="text-sm font-normal text-slate-300">/10</span>
+                            {cell.fairness_adjusted_score ?? 'N/A'}<span className="text-sm font-normal text-slate-300">/100</span>
                         </div>
-                        <p className="text-xs text-slate-400 mt-1">👁 Avg. Public Health</p>
+                        <p className="text-xs text-slate-400 mt-1">Adjusted for vulnerability</p>
                     </div>
                 </div>
 
                 {/* Tab Bar */}
-                <div className="flex space-x-0 border-b border-slate-200 mb-8">
-                    {['overview', 'services', 'trends'].map((tab) => (
+                <div className="flex space-x-0 border-b border-slate-200 mb-8 overflow-x-auto">
+                    {['overview', 'services', 'trends', ...(vulnerabilityMode || cell.vulnerability_index !== undefined ? ['vulnerability'] : [])].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
-                            className={`px-6 py-3 text-sm font-semibold capitalize transition-colors border-b-2 ${activeTab === tab
+                            className={`px-6 py-3 text-sm font-semibold capitalize transition-colors border-b-2 whitespace-nowrap ${activeTab === tab
                                 ? 'border-orange-500 text-slate-900'
                                 : 'border-transparent text-slate-400 hover:text-slate-600'
                                 }`}
                         >
-                            {tab === 'services' ? '📞 Services' : tab === 'trends' ? '📊 Trends' : '⬡ Overview'}
+                            {tab === 'services' ? '📞 Services' : tab === 'trends' ? '📊 Trends' : tab === 'vulnerability' ? '🛡️ Vulnerability Analysis' : '⬡ Overview'}
                         </button>
                     ))}
                 </div>
@@ -209,25 +219,6 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                                 </div>
                             </div>
 
-                            {/* Utility Data */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                        <Droplets className="w-4 h-4 text-blue-500" />
-                                        <span className="text-xs font-bold text-slate-600">Water Continuity</span>
-                                    </div>
-                                    <div className="text-2xl font-bold text-slate-800">{clamp(12 + cell.accessibility_score / 10, 12, 23).toFixed(1)} <span className="text-sm font-normal text-slate-400">hrs</span></div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Estimated daily supply based on infrastructure quality. <MetricTooltip metricKey="water_continuity" /></p>
-                                </div>
-                                <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                        <Trash2 className="w-4 h-4 text-emerald-500" />
-                                        <span className="text-xs font-bold text-slate-600">Waste Collection</span>
-                                    </div>
-                                    <div className="text-2xl font-bold text-slate-800">{Math.round(clamp(70 + cell.accessibility_score / 4, 65, 99))}<span className="text-sm font-normal text-slate-400">%</span></div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Estimated collection efficiency. <MetricTooltip metricKey="waste_collection" /></p>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Right Column */}
@@ -413,8 +404,6 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                                         <LineChart data={Object.entries(wardHistory_.history).map(([m, s]) => ({
                                             month: m,
                                             score: s,
-                                            complaints: Math.round(clamp(30 - (s / 4), 2, 40)),
-                                            coverage: Math.round(clamp(s * 0.8, 20, 95)),
                                         }))}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                                             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -429,9 +418,7 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                                                 }}
                                             />
                                             <Legend wrapperStyle={{ fontSize: '10px' }} />
-                                            <Line type="monotone" dataKey="score" name="Accessibility" stroke="#f97316" strokeWidth={3} dot={{ fill: '#f97316', strokeWidth: 2, r: 4, stroke: '#fff' }} activeDot={{ r: 6 }} />
-                                            <Line type="monotone" dataKey="coverage" name="Coverage %" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 3, stroke: '#fff' }} strokeDasharray="5 3" />
-                                            <Line type="monotone" dataKey="complaints" name="Complaints" stroke="#ef4444" strokeWidth={2} dot={{ fill: '#ef4444', r: 3, stroke: '#fff' }} strokeDasharray="3 3" />
+                                            <Line type="monotone" dataKey="score" name="Accessibility Score" stroke="#f97316" strokeWidth={3} dot={{ fill: '#f97316', strokeWidth: 2, r: 4, stroke: '#fff' }} activeDot={{ r: 6 }} />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 )}
@@ -443,6 +430,84 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                             <Button onClick={onGenerateReport} className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-6 px-8 rounded-xl shadow-lg">
                                 <Download className="mr-2 w-5 h-5" /> Generate Ward Report (PDF)
                             </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Vulnerability Tab */}
+                {activeTab === 'vulnerability' && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-8">
+                            {/* Analysis Panel */}
+                            <div className="bg-white border border-red-100 rounded-xl p-6 shadow-sm flex flex-col">
+                                <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center">
+                                    <Shield className="w-4 h-4 mr-2 text-red-500" />
+                                    Vulnerability Assessment
+                                </h3>
+                                <div className="space-y-4 flex-1">
+                                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
+                                       <span className="text-xs font-bold text-slate-600">Vulnerability Index</span>
+                                       <span className={`text-xl font-bold ${cell.vulnerability_index && cell.vulnerability_index > 60 ? 'text-red-500' : cell.vulnerability_index && cell.vulnerability_index > 40 ? 'text-orange-500' : 'text-emerald-500'}`}>{cell.vulnerability_index}/100</span>
+                                   </div>
+                                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
+                                       <span className="text-xs font-bold text-slate-600">Fairness-Adjusted Score</span>
+                                       <span className="text-xl font-bold text-slate-700">{cell.fairness_adjusted_score || cell.accessibility_score}/100</span>
+                                   </div>
+                                   {/* Missing Services that contribute to vulnerability */}
+                                   <div className="pt-2">
+                                       <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Critical Service Gaps</h4>
+                                       <div className="space-y-2">
+                                           {gapAnalysis.filter(g => g?.severity === 'Critical').length > 0 ? (
+                                                gapAnalysis.filter(g => g?.severity === 'Critical').map(g => (
+                                                    <div key={g?.service} className="flex items-center justify-between text-xs bg-red-50 p-3 rounded-lg border border-red-100">
+                                                        <span className="font-semibold text-red-700">{SERVICE_LABELS[g!.service] || g!.service}</span>
+                                                        <span className="text-red-600 font-bold">{g!.distance.toFixed(1)} km</span>
+                                                    </div>
+                                                ))
+                                           ) : (
+                                               <p className="text-xs text-slate-400 italic p-3 bg-slate-50 rounded-lg border border-slate-100">No critical service gaps found based on our current thresholds.</p>
+                                           )}
+                                       </div>
+                                   </div>
+                                </div>
+                            </div>
+                            
+                            {/* AI Plan Panel */}
+                            <div className="bg-gradient-to-br from-purple-50 to-white border border-purple-200 rounded-xl p-6 shadow-sm flex flex-col">
+                                <h3 className="text-sm font-bold text-purple-900 mb-4 flex items-center">
+                                    <Sparkles className="w-4 h-4 mr-2 text-purple-500" />
+                                    AI Mitigation Strategy
+                                </h3>
+                                
+                                <div className="flex-1">
+                                    {!vulnAIPlan && !isGeneratingVulnPlan && (
+                                        <div className="h-full flex flex-col items-center justify-center py-8">
+                                            <p className="text-xs text-slate-600 text-center mb-6 max-w-sm leading-relaxed">
+                                                Generate a customized, data-driven action plan using Gemini AI to address the specific vulnerabilities in <span className="font-bold text-purple-700">{cell.ward_name}</span>.
+                                            </p>
+                                            <Button 
+                                                onClick={handleGenerateVulnPlan}
+                                                className="bg-purple-600 hover:bg-purple-700 text-white font-bold transition-colors shadow-md"
+                                            >
+                                                <Sparkles className="w-4 h-4 mr-2" /> Draft AI Action Plan
+                                            </Button>
+                                        </div>
+                                    )}
+                                    
+                                    {isGeneratingVulnPlan && (
+                                        <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                                            <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full" />
+                                            <span className="text-xs font-bold text-purple-600 animate-pulse">Synthesizing neighborhood data...</span>
+                                        </div>
+                                    )}
+                                    
+                                    {vulnAIPlan && (
+                                        <div className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap bg-white/60 p-5 rounded-lg border border-purple-100 shadow-inner">
+                                            {vulnAIPlan}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}

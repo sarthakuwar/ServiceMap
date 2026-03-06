@@ -162,9 +162,9 @@ export default function SimulationAnalysisPanel({
                                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Avg Gain</div>
                                 <div className="text-xl font-extrabold text-emerald-600">+{avgScoreIncrease.toFixed(1)}</div>
                             </div>
-                            <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center">
-                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Impact</div>
-                                <ScoreRing score={impactScore} size={52} />
+                            <div className="bg-white border border-slate-200 rounded-xl p-3 text-center">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Max Dist Drop</div>
+                                <div className="text-xl font-extrabold text-indigo-600">{Math.abs(Math.min(0, ...serviceComparison.map(s => s.delta))).toFixed(1)}<span className="text-sm font-normal text-slate-400">km</span></div>
                             </div>
                         </div>
 

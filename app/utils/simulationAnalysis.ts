@@ -241,7 +241,7 @@ export function generatePlanningRecommendation(
     }
 
     let rec = `Recommendation: Construct a ${label.charAt(0).toUpperCase() + label.slice(1)} in ${bestWard.wardName}.`;
-    rec += ` Expected Impact Score: ${impactScore}/100.`;
+    rec += ` Expected Reach: ${bestWard.populationAffected >= 1000 ? (bestWard.populationAffected / 1000).toFixed(1) + 'k' : bestWard.populationAffected} residents.`;
 
     if (matchedGrievances > 0) {
         rec += ` Addresses ${matchedGrievances} open citizen complaint${matchedGrievances > 1 ? 's' : ''}.`;

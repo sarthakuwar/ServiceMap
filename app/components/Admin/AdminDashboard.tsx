@@ -190,7 +190,7 @@ export default function AdminDashboard() {
                             ) : (
                                 <div className="max-w-6xl mx-auto space-y-8">
                                     {/* Stats Cards */}
-                                    <div className="grid grid-cols-4 gap-6">
+                                    <div className="grid grid-cols-3 gap-6">
                                         <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm flex items-center">
                                             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
                                                 <AlertTriangle className="w-6 h-6 text-blue-600" />
@@ -210,21 +210,39 @@ export default function AdminDashboard() {
                                             </div>
                                         </div>
                                         <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm flex items-center">
+                                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-4">
+                                                <XCircle className="w-6 h-6 text-red-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-slate-500 font-medium">Overdue</p>
+                                                <p className="text-2xl font-bold text-red-600">{stats.overdue}</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm flex items-center">
                                             <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mr-4">
                                                 <CheckCircle2 className="w-6 h-6 text-emerald-600" />
                                             </div>
                                             <div>
-                                                <p className="text-sm text-slate-500 font-medium">Resolved</p>
+                                                <p className="text-sm text-slate-500 font-medium">Resolved (Month)</p>
                                                 <p className="text-2xl font-bold text-slate-900">{stats.resolved_this_month}</p>
                                             </div>
                                         </div>
                                         <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm flex items-center">
-                                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-4">
-                                                <Timer className="w-6 h-6 text-red-600" />
+                                            <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4">
+                                                <Timer className="w-6 h-6 text-purple-600" />
                                             </div>
                                             <div>
-                                                <p className="text-sm text-slate-500 font-medium">SLA Compliance</p>
-                                                <p className={`text-2xl font-bold ${stats.sla_compliance_rate >= 80 ? 'text-emerald-600' : 'text-red-600'}`}>{stats.sla_compliance_rate}%</p>
+                                                <p className="text-sm text-slate-500 font-medium">Avg Resolution Time</p>
+                                                <p className="text-2xl font-bold text-slate-900">{stats.avg_resolution_days} <span className="text-sm font-normal text-slate-500">days</span></p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm flex items-center">
+                                            <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mr-4">
+                                                <Shield className="w-6 h-6 text-emerald-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-slate-500 font-medium">SLA Compliance Rate</p>
+                                                <p className={`text-2xl font-bold ${stats.sla_compliance_rate >= 80 ? 'text-emerald-600' : 'text-orange-500'}`}>{stats.sla_compliance_rate}%</p>
                                             </div>
                                         </div>
                                     </div>
