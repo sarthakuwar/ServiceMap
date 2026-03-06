@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { GridCell, Facility, Recommendation, WardHistory, Insight } from './types';
+import { GridCell, Facility, Recommendation, WardHistory, Insight, SimulationAnalysis, Grievance, GovernmentUpdate } from './types';
 import { useSimulation } from './hooks/useSimulation';
 import { generateInsights } from './utils/insightEngine';
 import { generateWardReport } from './utils/reportGenerator';
+import { buildSimulationAnalysis } from './utils/simulationAnalysis';
+import { matchGrievancesToSimulation } from './utils/grievanceMatching';
 
 // Components
 import LeftSidebar from './components/Sidebar/LeftSidebar';
@@ -18,6 +20,8 @@ import GovernancePanel from './components/Panels/GovernancePanel';
 import AIChatbot from './components/UI/AIChatbot';
 import GrievanceDashboard from './components/Grievances/GrievanceDashboard';
 import GrievanceSubmitModal from './components/Grievances/GrievanceSubmitModal';
+import SimulationAnalysisPanel from './components/Panels/SimulationAnalysisPanel';
+import UpdatesPanel from './components/Panels/UpdatesPanel';
 
 // Dynamic Map
 const DynamicMap = dynamic(() => import('./components/Map/DynamicMap'), { ssr: false });
@@ -37,7 +41,9 @@ export default function Home() {
 
   // Simulation State
   const [activeSimType, setActiveSimType] = useState<string | null>(null);
-  const { isSimulating, setIsSimulating, placedFacilities, simulatedCells, addFacility, reset, impactSummary } = useSimulation(gridCells);
+  const { isSimulating, setIsSimulating, placedFacilities, simulatedCells, originalCells, addFacility, reset, impactSummary } = useSimulation(gridCells);
+  const [showAnalysisPanel, setShowAnalysisPanel] = useState(false);
+  const [grievances, setGrievances] = useState<Grievance[]>([]);
 
   // Selection State
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
@@ -47,6 +53,25 @@ export default function Home() {
   const [showGrievanceModal, setShowGrievanceModal] = useState(false);
   const [pendingGrievances, setPendingGrievances] = useState(0);
 
+  // Government Updates State
+  const [showUpdatesPanel, setShowUpdatesPanel] = useState(false);
+  const [updates, setUpdates] = useState<GovernmentUpdate[]>([]);
+  
+  // Simulation Analysis (computed)
+  const simulationAnalysis = useMemo<SimulationAnalysis | null>(() => {
+    if (!impactSummary || impactSummary.zonesImproved === 0) return null;
+    const facilityTypes = placedFacilities.map(f => f.type);
+    const affectedWardNames = Array.from(new Set(simulatedCells.filter((c, i) =>
+      c.accessibility_score !== originalCells[i]?.accessibility_score
+    ).map(c => c.ward_name)));
+    const matched = matchGrievancesToSimulation(grievances, facilityTypes, affectedWardNames);
+    return buildSimulationAnalysis(
+      originalCells, simulatedCells, facilityTypes,
+      impactSummary.populationAffected, impactSummary.zonesImproved,
+      impactSummary.avgScoreIncrease, matched.length
+    );
+  }, [impactSummary, originalCells, simulatedCells, placedFacilities, grievances]);
+
   const API_BASE = 'http://localhost:8000';
 
   useEffect(() => {
@@ -54,12 +79,14 @@ export default function Home() {
       fetch(`${API_BASE}/api/grid?vulnerability=true`).then(r => r.json()),
       fetch(`${API_BASE}/api/facilities`).then(r => r.json()),
       fetch(`${API_BASE}/api/recommendations`).then(r => r.json()),
-      fetch(`${API_BASE}/api/ward-history`).then(r => r.json())
-    ]).then(([cellsData, facData, recData, historyData]) => {
+      fetch(`${API_BASE}/api/ward-history`).then(r => r.json()),
+      fetch(`${API_BASE}/api/grievances`).then(r => r.json()).catch(() => []),
+    ]).then(([cellsData, facData, recData, historyData, grievanceData]) => {
       setGridCells(cellsData);
       setFacilities(facData);
       setRecommendations(recData);
       setWardHistory(historyData);
+      setGrievances(grievanceData);
       setInsights(generateInsights(cellsData));
       setLoading(false);
     }).catch(() => {
@@ -68,12 +95,14 @@ export default function Home() {
         fetch('/data/gridCells.json').then(r => r.json()),
         fetch('/data/facilities.json').then(r => r.json()),
         fetch('/data/recommendations.json').then(r => r.json()),
-        fetch('/data/wardHistory.json').then(r => r.json())
-      ]).then(([cellsData, facData, recData, historyData]) => {
+        fetch('/data/wardHistory.json').then(r => r.json()),
+        fetch('/data/grievances.json').then(r => r.json()).catch(() => []),
+      ]).then(([cellsData, facData, recData, historyData, grievanceData]) => {
         setGridCells(cellsData);
         setFacilities(facData);
         setRecommendations(recData);
         setWardHistory(historyData);
+        setGrievances(grievanceData);
         setInsights(generateInsights(cellsData));
         setLoading(false);
       }).catch(err => {
@@ -88,6 +117,17 @@ export default function Home() {
     fetch(`${API_BASE}/api/grievances/stats`)
       .then(r => r.json())
       .then(s => setPendingGrievances(s.pending_ack || 0))
+      .catch(() => { });
+  }, []);
+
+  // Fetch government updates
+  useEffect(() => {
+    fetch(`${API_BASE}/api/updates`)
+      .then(r => r.json())
+      .then(data => {
+          if (Array.isArray(data)) setUpdates(data);
+          else if (data.updates) setUpdates(data.updates);
+      })
       .catch(() => { });
   }, []);
 
@@ -122,6 +162,34 @@ export default function Home() {
     }
   };
 
+  const unreadUpdatesCount = updates.filter(u => !u.read).length;
+
+  const handleToggleUpdates = () => {
+      setShowUpdatesPanel(!showUpdatesPanel);
+      if (!showUpdatesPanel) {
+          setUpdates(updates.map(u => ({ ...u, read: true })));
+      }
+  };
+
+  const handleSendUpdate = async (updateData: any) => {
+      const res = await fetch(`${API_BASE}/api/updates`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...updateData, officer_name: 'System Admin' })
+      });
+      const result = await res.json();
+      
+      fetch(`${API_BASE}/api/updates`)
+        .then(r => r.json())
+        .then(data => {
+            if (Array.isArray(data)) setUpdates(data.map(u => ({ ...u, read: true })));
+            else if (data.updates) setUpdates(data.updates.map((u: any) => ({ ...u, read: true })));
+        })
+        .catch(() => { });
+        
+      return result;
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-slate-50 flex-col">
@@ -148,6 +216,8 @@ export default function Home() {
         setVisibleFacilities={setVisibleFacilities}
         onReportIssue={() => setShowGrievanceModal(true)}
         grievanceCount={pendingGrievances}
+        unreadUpdates={unreadUpdatesCount}
+        onToggleUpdates={handleToggleUpdates}
       />
 
       <main className="flex-1 relative flex">
@@ -210,8 +280,22 @@ export default function Home() {
           <SimulationToolbar
             activeType={activeSimType}
             setActiveType={setActiveSimType}
-            onReset={reset}
+            onReset={() => { reset(); setShowAnalysisPanel(false); }}
+            onViewAnalysis={impactSummary && impactSummary.zonesImproved > 0 ? () => setShowAnalysisPanel(true) : undefined}
             impactSummary={impactSummary}
+          />
+        )}
+
+        {/* Simulation Analysis Panel */}
+        {showAnalysisPanel && simulationAnalysis && (
+          <SimulationAnalysisPanel
+            analysis={simulationAnalysis}
+            facilityTypes={placedFacilities.map(f => f.type)}
+            onClose={() => setShowAnalysisPanel(false)}
+            matchedGrievances={grievances.filter(g =>
+              matchGrievancesToSimulation([g], placedFacilities.map(f => f.type),
+                simulationAnalysis.affectedWards.map(w => w.wardName)).length > 0
+            )}
           />
         )}
 
@@ -232,6 +316,16 @@ export default function Home() {
           <div className="absolute inset-0 z-[2000] bg-white/95 backdrop-blur-lg overflow-hidden">
             <GrievanceDashboard />
           </div>
+        )}
+
+        {/* Government Updates Panel */}
+        {showUpdatesPanel && (
+            <UpdatesPanel 
+                updates={updates}
+                availableWards={Array.from(new Set(gridCells.map(c => c.ward_name)))}
+                onClose={() => setShowUpdatesPanel(false)}
+                onSendUpdate={handleSendUpdate}
+            />
         )}
 
         {/* Report Export View */}

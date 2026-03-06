@@ -2,9 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { GridCell, WardHistory, ContactEntry } from '@/app/types';
-import { X, Users, Activity, Download, Shield, TrendingUp, Phone, MapPin, Clock, AlertTriangle, Droplets, Trash2, ExternalLink, Info, Database } from 'lucide-react';
+import { X, Users, Activity, Download, Shield, TrendingUp, Phone, MapPin, Clock, AlertTriangle, Droplets, Trash2, ExternalLink, Info, Database, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, LineChart, Line, CartesianGrid } from 'recharts';
+import { METRIC_DEFINITIONS } from '@/app/constants/metrics';
+import EmailPromptModal from '../UI/EmailPromptModal';
+
+function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)); }
+
+function MetricTooltip({ metricKey }: { metricKey: string }) {
+    const def = METRIC_DEFINITIONS[metricKey];
+    if (!def) return null;
+    return (
+        <span className="relative group inline-block ml-1 cursor-help">
+            <HelpCircle className="w-3 h-3 text-slate-300 inline" />
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-slate-900 text-white text-[10px] rounded-lg px-3 py-2 w-56 z-50 shadow-lg leading-relaxed">
+                {def.description}
+                <br/><br/>
+                <span className="text-slate-400">Formula: </span>{def.formula}
+            </span>
+        </span>
+    );
+}
 
 interface WardDetailPageProps {
     cell: GridCell;
@@ -36,6 +55,8 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
     const [contacts, setContacts] = useState<Record<string, ContactEntry[]> | null>(null);
     const [contactsLoading, setContactsLoading] = useState(false);
     const [showMethodology, setShowMethodology] = useState(false);
+    const [showFollowModal, setShowFollowModal] = useState(false);
+    const [followerCount, setFollowerCount] = useState<number | null>(null);
 
     const cityAvg = allCells.length > 0 ? Math.round(allCells.reduce((sum, c) => sum + c.accessibility_score, 0) / allCells.length) : 0;
     const wardCells = allCells.filter(c => c.ward_name === cell.ward_name);
@@ -52,6 +73,26 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                 .catch(() => { setContacts(null); setContactsLoading(false); });
         }
     }, [activeTab, cell.cell_id, contacts]);
+
+    useEffect(() => {
+        fetch(`http://localhost:8000/api/wards/${encodeURIComponent(cell.ward_name)}/followers`)
+            .then(r => r.json())
+            .then(d => setFollowerCount(d.follower_count))
+            .catch(() => {});
+    }, [cell.ward_name]);
+
+    const handleFollow = async (email: string) => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/wards/${encodeURIComponent(cell.ward_name)}/follow`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            }).then(r => r.json());
+            if (res.follower_count !== undefined) {
+                setFollowerCount(res.follower_count);
+            }
+        } catch { }
+    };
 
     const getScoreColor = (s: number) => s >= 80 ? 'text-emerald-600' : s >= 60 ? 'text-yellow-600' : s >= 40 ? 'text-orange-500' : 'text-red-500';
     const getBarColor = (dist: number) => dist > 3 ? '#ef4444' : dist > 1.5 ? '#f59e0b' : '#10b981';
@@ -106,6 +147,9 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                         </div>
                     </div>
                     <div className="flex items-center space-x-3">
+                        <Button variant="outline" onClick={() => setShowFollowModal(true)} className="border-orange-200 text-orange-600 hover:bg-orange-50 text-xs font-bold px-4">
+                            <Users className="w-3 h-3 mr-1.5" /> Follow Update{followerCount !== null ? `s (${followerCount})` : 's'}
+                        </Button>
                         <Button variant="outline" onClick={() => setShowMethodology(true)} className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs font-bold px-4">
                             <Info className="w-3 h-3 mr-1.5" /> Methodology
                         </Button>
@@ -134,12 +178,12 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                         <p className="text-xs text-slate-400 mt-1">High Density Area</p>
                     </div>
                     <div className="bg-white border border-slate-200 rounded-xl p-5">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Civic Issues Resolved</div>
-                        <div className="text-3xl font-extrabold text-emerald-600">92%</div>
-                        <p className="text-xs text-slate-400 mt-1">Top 10% in City</p>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Civic Issues Resolved <MetricTooltip metricKey="civic_issues_resolved" /></div>
+                        <div className="text-3xl font-extrabold text-emerald-600">{Math.round(clamp(0.5 + cell.accessibility_score / 200, 0.4, 0.95) * 100)}%</div>
+                        <p className="text-xs text-slate-400 mt-1">Based on ward accessibility</p>
                     </div>
                     <div className="bg-white border border-slate-200 rounded-xl p-5">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Service Coverage</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Service Coverage <MetricTooltip metricKey="service_coverage" /></div>
                         <div className="text-3xl font-extrabold text-blue-600">
                             {cell.locality_rating}<span className="text-sm font-normal text-slate-300">/10</span>
                         </div>
@@ -196,16 +240,16 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                                         <Droplets className="w-4 h-4 text-blue-500" />
                                         <span className="text-xs font-bold text-slate-600">Water Continuity</span>
                                     </div>
-                                    <div className="text-2xl font-bold text-slate-800">18.5 <span className="text-sm font-normal text-slate-400">hrs</span></div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Average daily supply period in 4 main sectors.</p>
+                                    <div className="text-2xl font-bold text-slate-800">{clamp(12 + cell.accessibility_score / 10, 12, 23).toFixed(1)} <span className="text-sm font-normal text-slate-400">hrs</span></div>
+                                    <p className="text-[10px] text-slate-400 mt-1">Estimated daily supply based on infrastructure quality. <MetricTooltip metricKey="water_continuity" /></p>
                                 </div>
                                 <div className="bg-white border border-slate-200 rounded-xl p-5">
                                     <div className="flex items-center space-x-2 mb-2">
                                         <Trash2 className="w-4 h-4 text-emerald-500" />
                                         <span className="text-xs font-bold text-slate-600">Waste Collection</span>
                                     </div>
-                                    <div className="text-2xl font-bold text-slate-800">94<span className="text-sm font-normal text-slate-400">%</span></div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Door-to-door collection efficiency in the last 30 days.</p>
+                                    <div className="text-2xl font-bold text-slate-800">{Math.round(clamp(70 + cell.accessibility_score / 4, 65, 99))}<span className="text-sm font-normal text-slate-400">%</span></div>
+                                    <p className="text-[10px] text-slate-400 mt-1">Estimated collection efficiency. <MetricTooltip metricKey="waste_collection" /></p>
                                 </div>
                             </div>
                         </div>
@@ -375,22 +419,27 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                                     ))}
                                 </div>
 
-                                {/* Governance Status */}
+                                {/* Data Transparency Rating */}
                                 <div className={`mt-6 p-4 rounded-xl ${wardHistory_?.badge === 'Improving' ? 'bg-emerald-50 border border-emerald-200' : wardHistory_?.badge === 'Declining' ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'}`}>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Governance Status</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Data Transparency Rating <MetricTooltip metricKey="data_transparency" /></div>
                                     <div className={`text-lg font-bold ${wardHistory_?.badge === 'Improving' ? 'text-emerald-700' : wardHistory_?.badge === 'Declining' ? 'text-red-700' : 'text-blue-700'}`}>
                                         {wardHistory_?.badge === 'Improving' ? 'Highly Transparent' : wardHistory_?.badge === 'Declining' ? 'Needs Improvement' : 'Stable'}
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-1">Meeting 9/10 compliance standards for public data sharing.</p>
+                                    <p className="text-xs text-slate-500 mt-1">Based on accessibility score trajectory over 6 months.</p>
                                 </div>
                             </div>
 
                             {/* Line Chart */}
                             <div className="bg-white border border-slate-200 rounded-xl p-6">
-                                <h3 className="text-sm font-bold text-slate-900 mb-4">Service Index Trend</h3>
+                                <h3 className="text-sm font-bold text-slate-900 mb-4">Multi-Metric Trend Analysis</h3>
                                 {wardHistory_ && (
                                     <ResponsiveContainer width="100%" height={280}>
-                                        <LineChart data={Object.entries(wardHistory_.history).map(([m, s]) => ({ month: m, score: s }))}>
+                                        <LineChart data={Object.entries(wardHistory_.history).map(([m, s]) => ({
+                                            month: m,
+                                            score: s,
+                                            complaints: Math.round(clamp(30 - (s / 4), 2, 40)),
+                                            coverage: Math.round(clamp(s * 0.8, 20, 95)),
+                                        }))}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                                             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                                             <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -403,7 +452,10 @@ export default function WardDetailPage({ cell, allCells, wardHistory, onClose, o
                                                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
                                                 }}
                                             />
-                                            <Line type="monotone" dataKey="score" stroke="#f97316" strokeWidth={3} dot={{ fill: '#f97316', strokeWidth: 2, r: 5, stroke: '#fff' }} activeDot={{ r: 7 }} />
+                                            <Legend wrapperStyle={{ fontSize: '10px' }} />
+                                            <Line type="monotone" dataKey="score" name="Accessibility" stroke="#f97316" strokeWidth={3} dot={{ fill: '#f97316', strokeWidth: 2, r: 4, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                                            <Line type="monotone" dataKey="coverage" name="Coverage %" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 3, stroke: '#fff' }} strokeDasharray="5 3" />
+                                            <Line type="monotone" dataKey="complaints" name="Complaints" stroke="#ef4444" strokeWidth={2} dot={{ fill: '#ef4444', r: 3, stroke: '#fff' }} strokeDasharray="3 3" />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 )}

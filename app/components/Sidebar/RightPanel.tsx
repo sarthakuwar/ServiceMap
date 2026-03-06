@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, Users, Activity, Download, MessageSquare, Send, Phone, MapPin, Clock, AlertTriangle, Shield } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
+import EmailPromptModal from '../UI/EmailPromptModal';
 
 interface RightPanelProps {
     cell: GridCell | null;
@@ -31,6 +32,8 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
     const [localComments, setLocalComments] = useState<string[]>([]);
     const [contacts, setContacts] = useState<Record<string, ContactEntry[]> | null>(null);
     const [contactsLoading, setContactsLoading] = useState(false);
+    const [showFollowModal, setShowFollowModal] = useState(false);
+    const [followerCount, setFollowerCount] = useState<number | null>(null);
 
     useEffect(() => {
         if (cell && activeTab === 'contacts' && !contacts) {
@@ -43,9 +46,30 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
     }, [cell, activeTab, contacts]);
 
     useEffect(() => {
+        if (!cell) return;
         setContacts(null);
         setActiveTab('overview');
-    }, [cell?.cell_id]);
+        
+        // Fetch follower count
+        fetch(`http://localhost:8000/api/wards/${encodeURIComponent(cell.ward_name)}/followers`)
+            .then(r => r.json())
+            .then(d => setFollowerCount(d.follower_count))
+            .catch(() => {});
+    }, [cell?.cell_id, cell?.ward_name]);
+
+    const handleFollow = async (email: string) => {
+        if (!cell) return;
+        try {
+            const res = await fetch(`http://localhost:8000/api/wards/${encodeURIComponent(cell.ward_name)}/follow`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            }).then(r => r.json());
+            if (res.follower_count !== undefined) {
+                setFollowerCount(res.follower_count);
+            }
+        } catch { }
+    };
 
     if (!cell) return null;
 
@@ -66,11 +90,15 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
 
     return (
         <div className="absolute top-0 right-0 h-full w-[400px] bg-white border-l border-slate-200 flex flex-col z-[2000] shadow-2xl transform transition-transform duration-300">
-            {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-100">
                 <div>
                     <h2 className="text-xl font-bold text-slate-900">{cell.ward_name}</h2>
-                    <p className="text-xs text-slate-400 font-medium">Zone: South Bangalore</p>
+                    <div className="flex items-center space-x-3 mt-1">
+                        <p className="text-xs text-slate-400 font-medium">Zone: South Bangalore</p>
+                        <button onClick={() => setShowFollowModal(true)} className="text-[10px] font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2 py-0.5 rounded-full transition-colors flex items-center">
+                            <Users className="w-3 h-3 mr-1" /> Follow{followerCount !== null ? ` (${followerCount})` : ''}
+                        </button>
+                    </div>
                 </div>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
                     <X className="w-6 h-6" />
@@ -330,6 +358,15 @@ export default function RightPanel({ cell, onClose, onGenerateReport, onViewDeta
                     <Download className="mr-2 w-5 h-5" /> Generate Ward Report
                 </Button>
             </div>
+
+            <EmailPromptModal
+                isOpen={showFollowModal}
+                onClose={() => setShowFollowModal(false)}
+                onSubmit={handleFollow}
+                title={`Follow ${cell.ward_name}`}
+                description="Get email notifications about infrastructure updates and government announcements in this ward."
+                entityName="this ward"
+            />
         </div>
     );
 }

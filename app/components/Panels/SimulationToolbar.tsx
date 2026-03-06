@@ -1,9 +1,10 @@
-import { Hospital, School, Bus, Shield, Flame, RotateCcw } from 'lucide-react';
+import { Hospital, School, Bus, Shield, Flame, RotateCcw, BarChart3 } from 'lucide-react';
 
 interface SimulationToolbarProps {
     activeType: string | null;
     setActiveType: (t: string | null) => void;
     onReset: () => void;
+    onViewAnalysis?: () => void;
     impactSummary?: { populationAffected: number; zonesImproved: number; avgScoreIncrease: number; } | null;
 }
 
@@ -15,7 +16,7 @@ const SIM_TOOLS = [
     { key: 'fire_station', label: 'Fire Station', icon: Flame, color: 'text-orange-500' },
 ];
 
-export default function SimulationToolbar({ activeType, setActiveType, onReset, impactSummary }: SimulationToolbarProps) {
+export default function SimulationToolbar({ activeType, setActiveType, onReset, onViewAnalysis, impactSummary }: SimulationToolbarProps) {
     return (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center space-y-3">
             {/* Impact Summary */}
@@ -33,6 +34,13 @@ export default function SimulationToolbar({ activeType, setActiveType, onReset, 
                         <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Avg Score Gain</div>
                         <div className="text-xl font-bold text-orange-500">+{impactSummary.avgScoreIncrease.toFixed(1)}</div>
                     </div>
+                    {onViewAnalysis && (
+                        <button onClick={onViewAnalysis}
+                            className="ml-4 pl-8 flex flex-col items-center px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md hover:from-orange-600 hover:to-orange-700 transition-all">
+                            <BarChart3 className="w-5 h-5 text-white" />
+                            <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Analysis</span>
+                        </button>
+                    )}
                 </div>
             )}
 

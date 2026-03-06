@@ -127,6 +127,7 @@ export function useSimulation(initialCells: GridCell[]) {
         setIsSimulating,
         placedFacilities,
         simulatedCells,
+        originalCells,
         addFacility,
         reset,
         impactSummary

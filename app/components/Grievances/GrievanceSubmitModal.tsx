@@ -260,10 +260,13 @@ export default function GrievanceSubmitModal({ isOpen, onClose, prefilledLocatio
                                 <input type="text" value={citizenName} onChange={e => setCitizenName(e.target.value)} placeholder="Your name" required={!isAnonymous}
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-200" />
                                 <div className="grid grid-cols-2 gap-3">
-                                    <input type="tel" value={citizenPhone} onChange={e => setCitizenPhone(e.target.value)} placeholder="Phone (for updates)"
+                                    <input type="tel" value={citizenPhone} onChange={e => setCitizenPhone(e.target.value)} placeholder="Phone"
                                         className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-200" />
-                                    <input type="email" value={citizenEmail} onChange={e => setCitizenEmail(e.target.value)} placeholder="Email (optional)"
-                                        className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+                                    <div>
+                                        <input type="email" value={citizenEmail} onChange={e => setCitizenEmail(e.target.value)} placeholder="Email (for updates)"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+                                        <p className="text-[9px] text-slate-400 mt-1 pl-1">We'll send status updates here</p>
+                                    </div>
                                 </div>
                             </div>
                         )}

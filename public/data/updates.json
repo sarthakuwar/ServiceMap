@@ -1,0 +1,26 @@
+[
+  {
+    "id": "upd-9f8e7d21",
+    "message": "Water pipe repair work completed in Sector 4. Regular supply will resume from 6 PM today.",
+    "officer_name": "Ramesh Kumar (BWSSB)",
+    "ward_name": "HSR Layout",
+    "emails_sent": 142,
+    "timestamp": "2023-10-24T10:30:00Z"
+  },
+  {
+    "id": "upd-2a3b4c5d",
+    "message": "Public consultation for the new Primary Health Center will be held this Saturday at the Ward Office.",
+    "officer_name": "Dr. Sarah Thomas (BBMP Health)",
+    "ward_name": "Koramangala",
+    "emails_sent": 58,
+    "timestamp": "2023-10-23T14:15:00Z"
+  },
+  {
+    "id": "upd-1e1b1c1d",
+    "message": "City-wide pothole filling drive initiated. All reported potholes mapped on ServiceMap will be addressed within 14 days.",
+    "officer_name": "Rajiv N (Zonal Commissioner)",
+    "ward_name": null,
+    "emails_sent": 4500,
+    "timestamp": "2023-10-20T09:00:00Z"
+  }
+]

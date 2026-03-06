@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { WardHistory } from '@/app/types';
 import { BarChart, Bar, XAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
+import { RefreshCw } from 'lucide-react';
 
 interface GovernancePanelProps {
     history: WardHistory[];
@@ -26,6 +28,13 @@ const getBarColor = (badge: string, isLatest: boolean) => {
 };
 
 export default function GovernancePanel({ history }: GovernancePanelProps) {
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const handleSync = () => {
+        setIsSyncing(true);
+        setTimeout(() => setIsSyncing(false), 1500);
+    };
+
     return (
         <div className="h-full overflow-y-auto p-8">
             <div className="flex items-center justify-between mb-6">
@@ -98,9 +107,19 @@ export default function GovernancePanel({ history }: GovernancePanelProps) {
                         <p className="text-xs text-orange-600 mt-0.5">Monthly accountability reports for {history.length} wards are ready for review.</p>
                     </div>
                 </div>
-                <button className="bg-orange-500 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors shrink-0">
-                    Review All
-                </button>
+                <div className="flex space-x-2">
+                    <button 
+                        onClick={handleSync}
+                        disabled={isSyncing}
+                        className="bg-white border border-slate-200 text-slate-600 text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors shrink-0 flex items-center"
+                    >
+                        <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                        {isSyncing ? 'Syncing...' : 'Sync Municipal Data'}
+                    </button>
+                    <button className="bg-orange-500 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors shrink-0">
+                        Review All
+                    </button>
+                </div>
             </div>
         </div>
     );

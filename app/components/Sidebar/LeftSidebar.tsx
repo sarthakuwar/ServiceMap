@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Map, Activity, BarChart3, Shield, Eye, EyeOff, MessageSquareWarning, AlertTriangle } from 'lucide-react';
+import { Map, Activity, BarChart3, Shield, Eye, EyeOff, MessageSquareWarning, AlertTriangle, Bell } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface LeftSidebarProps {
@@ -13,6 +13,8 @@ interface LeftSidebarProps {
     setVisibleFacilities?: (v: string[]) => void;
     onReportIssue?: () => void;
     grievanceCount?: number;
+    unreadUpdates?: number;
+    onToggleUpdates?: () => void;
 }
 
 const FACILITY_LAYERS = [
@@ -23,14 +25,14 @@ const FACILITY_LAYERS = [
     { key: 'fire_station', label: 'Fire Stations', icon: '🚒', color: 'text-orange-500' },
 ];
 
-export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, impactSummary, vulnerabilityMode = false, setVulnerabilityMode, visibleFacilities = [], setVisibleFacilities, onReportIssue, grievanceCount }: LeftSidebarProps) {
+export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, impactSummary, vulnerabilityMode = false, setVulnerabilityMode, visibleFacilities = [], setVisibleFacilities, onReportIssue, grievanceCount, unreadUpdates = 0, onToggleUpdates }: LeftSidebarProps) {
     const getScoreColor = (s: number) => s >= 80 ? 'bg-emerald-500' : s >= 60 ? 'bg-yellow-500' : s >= 40 ? 'bg-orange-500' : 'bg-red-500';
     const getScoreTextColor = (s: number) => s >= 80 ? 'text-emerald-600' : s >= 60 ? 'text-yellow-600' : s >= 40 ? 'text-orange-500' : 'text-red-500';
 
     return (
         <div className="w-72 h-full bg-white border-r border-slate-200 flex flex-col shadow-lg z-[50]">
             {/* Brand */}
-            <div className="p-6 pb-2 border-b border-slate-100">
+            <div className="p-6 pb-2 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center space-x-3 mb-5">
                     <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
                         UP
@@ -40,6 +42,18 @@ export default function LeftSidebar({ activeView, setActiveView, avgScore = 0, i
                         <p className="text-xs text-emerald-600 font-medium uppercase tracking-wider">Gov. Dashboard</p>
                     </div>
                 </div>
+                
+                {onToggleUpdates && (
+                    <button 
+                        onClick={onToggleUpdates}
+                        className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors mb-5"
+                    >
+                        <Bell className="w-5 h-5" />
+                        {unreadUpdates > 0 && (
+                            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border border-white rounded-full"></span>
+                        )}
+                    </button>
+                )}
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-5">

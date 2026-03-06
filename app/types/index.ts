@@ -292,6 +292,19 @@ export interface Grievance {
     vulnerability_index_at_filing?: number;
     timeline: GrievanceTimelineEntry[];
     upvotes: number;
+    followers?: string[];
+}
+
+export interface GovernmentUpdate {
+    id: string;
+    message: string;
+    target_type: 'ward' | 'issue';
+    target_ward?: string;
+    target_issue_id?: string;
+    timestamp: string;
+    officer_name: string;
+    emails_sent?: number;
+    read?: boolean;
 }
 
 export interface OfficerInfo {
@@ -327,3 +340,38 @@ export interface GrievanceDashboardStats {
     by_status: Record<string, number>;
     by_department: Record<string, number>;
 }
+
+// ─── Simulation Analysis Types ──────────────────────────────────────────────
+
+export interface CoverageImprovements {
+    healthcare: number;
+    emergency: number;
+    transit: number;
+    education: number;
+}
+
+export interface AffectedWard {
+    wardName: string;
+    wardId: string;
+    accessibilityBefore: number;
+    accessibilityAfter: number;
+    accessibilityDelta: number;
+    populationAffected: number;
+}
+
+export interface SimulationAnalysis {
+    beforeCells: GridCell[];
+    afterCells: GridCell[];
+    populationAffected: number;
+    zonesImproved: number;
+    avgScoreIncrease: number;
+    coverageImprovements: CoverageImprovements;
+    vulnerabilityReduction: { before: number; after: number };
+    affectedWards: AffectedWard[];
+    impactScore: number;
+    insightNarrative: string;
+    recommendation: string;
+    matchedGrievanceCount?: number;
+}
+
+// ─── Government Updates ─────────────────────────────────────────────────────
